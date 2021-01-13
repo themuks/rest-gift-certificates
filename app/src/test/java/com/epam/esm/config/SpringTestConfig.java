@@ -1,0 +1,24 @@
+package com.epam.esm.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+@Configuration
+@ComponentScan("com.epam.esm.model.dao.impl")
+@Import(DatabaseTestConfig.class)
+public class SpringTestConfig {
+    private final DatabaseTestConfig databaseTestConfig;
+
+    public SpringTestConfig(DatabaseTestConfig databaseTestConfig) {
+        this.databaseTestConfig = databaseTestConfig;
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManagerBean() {
+        return new DataSourceTransactionManager(databaseTestConfig.h2DataSource());
+    }
+}
