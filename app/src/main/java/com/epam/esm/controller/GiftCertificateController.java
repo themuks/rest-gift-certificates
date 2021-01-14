@@ -1,11 +1,11 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.model.dao.Sorter;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.Validator;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,18 +15,23 @@ import java.util.List;
 @RequestMapping("/gift-certificates")
 public class GiftCertificateController {
     private static final Logger log = Logger.getLogger(GiftCertificateController.class);
+    private static final String DESC = "DESC";
     private final GiftCertificateService giftCertificateService;
-
-    private Validator validator;
 
     public GiftCertificateController(GiftCertificateService giftCertificateService) {
         this.giftCertificateService = giftCertificateService;
     }
 
     @GetMapping()
-    public List<GiftCertificate> findAll() {
+    public List<GiftCertificate> findAll(@RequestAttribute(required = false) String sortType,
+                                         @RequestAttribute(required = false) String fieldName) {
+        Sorter sorter = new Sorter();
+        sorter.setFieldName(fieldName);
+        if (DESC.equals(sortType)) {
+            sorter.setDescending();
+        }
         try {
-            return giftCertificateService.findAll();
+            return giftCertificateService.findAll(sorter);
         } catch (ServiceException e) {
             log.error("Error while finding all gift certificates", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -53,10 +58,10 @@ public class GiftCertificateController {
         }
     }
 
-    @PutMapping("/{id}")
-    public void update(@PathVariable long id, @RequestBody GiftCertificate giftCertificate) {
+    @PatchMapping("/{id}")
+    public void update(@PathVariable long id, @RequestBody GiftCertificate patch) {
         try {
-            giftCertificateService.update(id, giftCertificate);
+            giftCertificateService.update(id, patch);
         } catch (ServiceException e) {
             log.error("Error while updating gift certificate", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,6 +74,23 @@ public class GiftCertificateController {
             giftCertificateService.delete(id);
         } catch (ServiceException e) {
             log.error("Error while deleting gift certificate", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @GetMapping("/tag/{tagName}")
+    public List<GiftCertificate> findByTagName(@PathVariable String tagName,
+                                               @RequestAttribute(required = false) String sortType,
+                                               @RequestAttribute(required = false) String fieldName) {
+        Sorter sorter = new Sorter();
+        sorter.setFieldName(fieldName);
+        if (DESC.equals(sortType)) {
+            sorter.setDescending();
+        }
+        try {
+            return giftCertificateService.findByTagName(tagName, sorter);
+        } catch (ServiceException e) {
+            log.error("Error while finding gift certificate by tag name", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

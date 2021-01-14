@@ -5,5 +5,9 @@ import com.epam.esm.entity.GiftCertificate;
 import java.util.List;
 
 public interface GiftCertificateDao extends BaseDao<GiftCertificate> {
-    List<GiftCertificate> findByTagId(long id, boolean isNested) throws DaoException;
+    List<GiftCertificate> findByTagId(long id) throws DaoException;
+
+    List<GiftCertificate> findByTagName(String tagName) throws DaoException;
+
+    List<GiftCertificate> findByTagName(String tagName, Sorter sorter) throws DaoException;
 }

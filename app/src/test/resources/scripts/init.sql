@@ -20,11 +20,12 @@ create table if not exists tag
 create table if not exists gift_certificate_has_tag
 (
     gift_certificate_id bigint not null,
-    tag_id bigint not null
-        primary key,
+    tag_id bigint not null,
     constraint gift_certificate_has_tag_gift_certificate_id_fk
-        foreign key (gift_certificate_id) references gift_certificate (id),
+        foreign key (gift_certificate_id) references gift_certificate (id)
+            on update cascade on delete cascade,
     constraint gift_certificate_has_tag_tag_id_fk
         foreign key (tag_id) references tag (id)
+            on update cascade on delete cascade
 );
 

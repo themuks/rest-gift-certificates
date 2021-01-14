@@ -4,6 +4,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
+import com.epam.esm.model.dao.Sorter;
 import com.epam.esm.model.dao.TagDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -34,17 +35,17 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
     private static final String UPDATE_GIFT_CERTIFICATE_QUERY =
             "UPDATE gift_certificate SET id = ?, name = ?, description = ?, " +
                     "price = ?, duration = ?, create_date = ?, last_update_date = ? WHERE id = ?";
-    private static final String DELETE_REF_DATA_QUERY =
-            "DELETE FROM tag WHERE id IN " +
-                    "(SELECT t.id FROM tag t " +
-                    "INNER JOIN gift_certificate_has_tag gcht ON t.id = gcht.tag_id " +
-                    "INNER JOIN gift_certificate gc on gcht.gift_certificate_id = gc.id WHERE gc.id = ?)";
-    private static final String DELETE_GIFT_CERTIFICATES_QUERY =
-            "DELETE FROM gift_certificate WHERE id = ?";
     private static final String FIND_BY_TAG_ID_QUERY =
             "SELECT id, name, description, price, duration, create_date, last_update_date " +
                     "FROM gift_certificate WHERE id IN " +
                     "(SELECT gift_certificate_id FROM gift_certificate_has_tag WHERE tag_id = ?)";
+    private static final String FIND_BY_TAG_NAME_QUERY =
+            "SELECT gc.id, gc.name, description, price, duration, create_date, last_update_date " +
+                    "FROM gift_certificate gc " +
+                    "INNER JOIN gift_certificate_has_tag gcht on gc.id = gcht.gift_certificate_id " +
+                    "INNER JOIN tag t on gcht.tag_id = t.id " +
+                    "WHERE t.name = ?";
+    private static final String DELETE_QUERY = "DELETE FROM gift_certificate WHERE id = ?";
     private final JdbcTemplate jdbcTemplate;
     private TagDao tagDao;
 
@@ -71,25 +72,15 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
             return ps;
         }, keyHolder);
         long generatedGiftCertificateId = keyHolder.getKey().longValue();
-        if (giftCertificate.getTags() != null) {
-            for (Tag tag : giftCertificate.getTags()) {
-                try {
-                    if (tagDao.findById(tag.getId()).isEmpty()) {
-                        long generatedTagId = tagDao.add(tag);
-                        jdbcTemplate.update(INSERT_INTO_REF_TABLE_QUERY, generatedGiftCertificateId, generatedTagId);
-                    }
-                } catch (DaoException e) {
-                    throw new DaoException("Error while adding tag", e);
-                }
-            }
-        }
+        giftCertificate.setId(generatedGiftCertificateId);
+        addNestedTags(giftCertificate);
         return generatedGiftCertificateId;
     }
 
     @Override
     public Optional<GiftCertificate> findById(long id) throws DaoException {
         try {
-            List<Tag> tags = tagDao.findByGiftCertificateId(id, false);
+            List<Tag> tags = tagDao.findByGiftCertificateId(id);
             GiftCertificate giftCertificate = jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, new GiftCertificateRowMapper(), id);
             giftCertificate.setTags(tags);
             return Optional.of(giftCertificate);
@@ -100,47 +91,90 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findAll() throws DaoException {
-        List<GiftCertificate> giftCertificates = jdbcTemplate.query(FIND_ALL_QUERY,  new GiftCertificateRowMapper());
+        return findAll(new Sorter());
+    }
+
+    @Override
+    public List<GiftCertificate> findAll(Sorter sorter) throws DaoException {
+        List<GiftCertificate> giftCertificates = jdbcTemplate.query(sorter.prepareQuery(FIND_ALL_QUERY), new GiftCertificateRowMapper());
         for (GiftCertificate giftCertificate : giftCertificates) {
-            List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId(), false);
+            List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId());
             giftCertificate.setTags(tags);
         }
         return giftCertificates;
     }
 
     @Override
-    public void update(long id, GiftCertificate giftCertificate) throws DaoException {
-        jdbcTemplate.update(UPDATE_GIFT_CERTIFICATE_QUERY,
-                id,
-                giftCertificate.getName(),
-                giftCertificate.getDescription(),
-                giftCertificate.getPrice(),
-                giftCertificate.getDuration(),
-                Timestamp.valueOf(giftCertificate.getCreateDate()),
-                Timestamp.valueOf(giftCertificate.getLastUpdateDate()),
-                id);
+    public void update(long id, GiftCertificate patch) throws DaoException {
+        Optional<GiftCertificate> optionalGiftCertificate = findById(id);
+        if (optionalGiftCertificate.isPresent()) {
+            GiftCertificate giftCertificate = optionalGiftCertificate.get();
+            if (patch.getName() != null) {
+                giftCertificate.setName(patch.getName());
+            }
+            if (patch.getDescription() != null) {
+                giftCertificate.setDescription(patch.getDescription());
+            }
+            if (patch.getPrice() != null) {
+                giftCertificate.setPrice(patch.getPrice());
+            }
+            if (patch.getDuration() != null) {
+                giftCertificate.setDuration(patch.getDuration());
+            }
+            if (patch.getCreateDate() != null) {
+                giftCertificate.setCreateDate(patch.getCreateDate());
+            }
+            if (patch.getLastUpdateDate() != null) {
+                giftCertificate.setLastUpdateDate(patch.getLastUpdateDate());
+            }
+            if (patch.getTags() != null) {
+                patch.setId(id);
+                addNestedTags(patch);
+            }
+            jdbcTemplate.update(UPDATE_GIFT_CERTIFICATE_QUERY,
+                    id,
+                    giftCertificate.getName(),
+                    giftCertificate.getDescription(),
+                    giftCertificate.getPrice(),
+                    giftCertificate.getDuration(),
+                    giftCertificate.getCreateDate() != null
+                            ? Timestamp.valueOf(giftCertificate.getCreateDate())
+                            : null,
+                    giftCertificate.getLastUpdateDate() != null
+                            ? Timestamp.valueOf(giftCertificate.getLastUpdateDate())
+                            : null,
+                    id);
+        } else {
+            throw new DaoException("Gift certificate with such id is not exist");
+        }
     }
 
     @Override
     public void delete(long id) throws DaoException {
-        jdbcTemplate.update(DELETE_REF_DATA_QUERY, id);
-        jdbcTemplate.update(DELETE_GIFT_CERTIFICATES_QUERY, id);
+        jdbcTemplate.update(DELETE_QUERY, id);
+    }
+
+    public List<GiftCertificate> findByTagId(long id) throws DaoException {
+        return jdbcTemplate.query(FIND_BY_TAG_ID_QUERY, new GiftCertificateRowMapper(), id);
     }
 
     @Override
-    public List<GiftCertificate> findByTagId(long id, boolean isNested) throws DaoException {
-        List<GiftCertificate> giftCertificates = jdbcTemplate.query(FIND_BY_TAG_ID_QUERY, new GiftCertificateRowMapper(), id);
-        if (isNested) {
-            return giftCertificates;
-        }
+    public List<GiftCertificate> findByTagName(String tagName) throws DaoException {
+        return findByTagName(tagName, new Sorter());
+    }
+
+    @Override
+    public List<GiftCertificate> findByTagName(String tagName, Sorter sorter) throws DaoException {
+        List<GiftCertificate> giftCertificates = jdbcTemplate.query(FIND_BY_TAG_NAME_QUERY, new GiftCertificateRowMapper(), tagName);
         for (GiftCertificate giftCertificate : giftCertificates) {
-            List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId(), true);
+            List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId());
             giftCertificate.setTags(tags);
         }
         return giftCertificates;
     }
 
     private class GiftCertificateRowMapper implements RowMapper<GiftCertificate> {
+
         @Override
         public GiftCertificate mapRow(ResultSet rs, int rowNum) throws SQLException {
             return GiftCertificate.builder()
@@ -149,9 +183,33 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
                     .description(rs.getString(3))
                     .price(rs.getBigDecimal(4))
                     .duration(rs.getInt(5))
-                    .createDate(rs.getTimestamp(6).toLocalDateTime())
-                    .lastUpdateDate(rs.getTimestamp(7).toLocalDateTime())
+                    .createDate(rs.getTimestamp(6) != null
+                            ? rs.getTimestamp(6).toLocalDateTime()
+                            : null)
+                    .lastUpdateDate(rs.getTimestamp(6) != null
+                            ? rs.getTimestamp(7).toLocalDateTime()
+                            : null)
                     .build();
+        }
+    }
+    private void addNestedTags(GiftCertificate giftCertificate) throws DaoException {
+        if (giftCertificate.getTags() != null) {
+            for (Tag tag : giftCertificate.getTags()) {
+                try {
+                    if (tag.getId() == null) {
+                        long generatedTagId = tagDao.add(tag);
+                        tag.setId(generatedTagId);
+                    } else {
+                        if (tagDao.findById(tag.getId()).isEmpty()) {
+                            long generatedTagId = tagDao.add(tag);
+                            tag.setId(generatedTagId);
+                        }
+                    }
+                    jdbcTemplate.update(INSERT_INTO_REF_TABLE_QUERY, giftCertificate.getId(), tag.getId());
+                } catch (DaoException e) {
+                    throw new DaoException("Error while adding tag", e);
+                }
+            }
         }
     }
 }

@@ -10,6 +10,8 @@ public interface BaseDao<T> {
 
     List<T> findAll() throws DaoException;
 
+    List<T> findAll(Sorter sorter) throws DaoException;
+
     void update(long id, T t) throws DaoException;
 
     void delete(long id) throws DaoException;
