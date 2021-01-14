@@ -29,3 +29,4 @@ build
 .idea
 build
 .gradle
+!/gradle/wrapper/gradle-wrapper.jar
