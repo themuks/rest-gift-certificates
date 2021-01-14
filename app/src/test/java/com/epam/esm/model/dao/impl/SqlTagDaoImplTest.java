@@ -1,6 +1,7 @@
 package com.epam.esm.model.dao.impl;
 
 import com.epam.esm.config.SpringTestConfig;
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.TagDao;
@@ -16,12 +17,13 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ContextConfiguration(classes = SpringTestConfig.class)
 @ExtendWith(SpringExtension.class)
@@ -123,5 +125,39 @@ class SqlTagDaoImplTest {
 
     @Test
     void findByGiftCertificateId_ValidId_Tag() {
+        LocalDateTime localDateTime = LocalDateTime.of(12, 1, 1, 1, 1);
+        GiftCertificate giftCertificate1 = GiftCertificate.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .createDate(localDateTime)
+                .lastUpdateDate(localDateTime.plusDays(1))
+                .duration(1)
+                .price(new BigDecimal(123))
+                .build();
+        GiftCertificate giftCertificate2 = GiftCertificate.builder()
+                .id(2L)
+                .name("name")
+                .description("description")
+                .createDate(localDateTime)
+                .lastUpdateDate(localDateTime.plusDays(1))
+                .duration(1)
+                .price(new BigDecimal(123))
+                .build();
+        Tag tag = Tag.builder()
+                .id(1L)
+                .name("name")
+                .giftCertificates(List.of(giftCertificate1, giftCertificate2))
+                .build();
+        try {
+            long generatedId = tagDao.add(tag);
+            tag.setId(generatedId);
+            List<Tag> tags = tagDao.findByGiftCertificateId(2);
+            tag.setGiftCertificates(null);
+            boolean actual = tags.contains(tag);
+            assertTrue(actual);
+        } catch (DaoException e) {
+            fail(e);
+        }
     }
 }

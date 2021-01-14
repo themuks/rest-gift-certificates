@@ -1,6 +1,7 @@
 package com.epam.esm.model.service;
 
 import com.epam.esm.entity.Tag;
+import com.epam.esm.model.dao.Sorter;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,6 +12,8 @@ public interface TagService {
     Optional<Tag> findById(long id) throws ServiceException;
 
     List<Tag> findAll() throws ServiceException;
+
+    List<Tag> findAll(Sorter sorter) throws ServiceException;
 
     void delete(long id) throws ServiceException;
 }

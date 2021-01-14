@@ -1,6 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.entity.Tag;
+import com.epam.esm.model.dao.Sorter;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import org.apache.log4j.Logger;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequestMapping("/tags")
 public class TagController {
     private final static Logger log = Logger.getLogger(TagController.class);
+    private static final String DESC = "DESC";
     private final TagService tagService;
 
     public TagController(TagService tagService) {
@@ -21,9 +23,15 @@ public class TagController {
     }
 
     @GetMapping()
-    public List<Tag> findAll() {
+    public List<Tag> findAll(@RequestAttribute(required = false) String sortType,
+                             @RequestAttribute(required = false) String fieldName) {
+        Sorter sorter = new Sorter();
+        sorter.setFieldName(fieldName);
+        if (DESC.equals(sortType)) {
+            sorter.setDescending();
+        }
         try {
-            return tagService.findAll();
+            return tagService.findAll(sorter);
         } catch (ServiceException e) {
             log.error("Error while finding all tags", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -33,7 +41,7 @@ public class TagController {
     @GetMapping("/{id}")
     public Tag findById(@PathVariable long id) {
         try {
-            return tagService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR));
+            return tagService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         } catch (ServiceException e) {
             log.error("Error while finding tag by id", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);

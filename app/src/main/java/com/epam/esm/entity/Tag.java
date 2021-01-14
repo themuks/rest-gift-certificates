@@ -12,7 +12,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Tag {
-    private long id;
+    private Long id;
     private String name;
     private List<GiftCertificate> giftCertificates;
 }
