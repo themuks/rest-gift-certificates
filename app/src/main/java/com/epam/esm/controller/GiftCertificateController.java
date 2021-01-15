@@ -1,11 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.model.dao.Sorter;
+import com.epam.esm.model.dao.QuerySorter;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,7 +16,6 @@ import java.util.List;
 @RequestMapping("/gift-certificates")
 public class GiftCertificateController {
     private static final Logger log = Logger.getLogger(GiftCertificateController.class);
-    private static final String DESC = "DESC";
     private final GiftCertificateService giftCertificateService;
 
     public GiftCertificateController(GiftCertificateService giftCertificateService) {
@@ -23,15 +23,11 @@ public class GiftCertificateController {
     }
 
     @GetMapping()
-    public List<GiftCertificate> findAll(@RequestAttribute(required = false) String sortType,
-                                         @RequestAttribute(required = false) String fieldName) {
-        Sorter sorter = new Sorter();
-        sorter.setFieldName(fieldName);
-        if (DESC.equals(sortType)) {
-            sorter.setDescending();
-        }
+    public List<GiftCertificate> findAll(@RequestParam(required = false) MultiValueMap<String, String> sort) {
+        System.out.println(sort);
+        QuerySorter querySorter = new QuerySorter(sort);
         try {
-            return giftCertificateService.findAll(sorter);
+            return giftCertificateService.findAll(querySorter);
         } catch (ServiceException e) {
             log.error("Error while finding all gift certificates", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -80,15 +76,10 @@ public class GiftCertificateController {
 
     @GetMapping("/tag/{tagName}")
     public List<GiftCertificate> findByTagName(@PathVariable String tagName,
-                                               @RequestAttribute(required = false) String sortType,
-                                               @RequestAttribute(required = false) String fieldName) {
-        Sorter sorter = new Sorter();
-        sorter.setFieldName(fieldName);
-        if (DESC.equals(sortType)) {
-            sorter.setDescending();
-        }
+                                               @RequestParam(required = false) MultiValueMap<String, String> sort) {
+        QuerySorter querySorter = new QuerySorter(sort);
         try {
-            return giftCertificateService.findByTagName(tagName, sorter);
+            return giftCertificateService.findByTagName(tagName, querySorter);
         } catch (ServiceException e) {
             log.error("Error while finding gift certificate by tag name", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);

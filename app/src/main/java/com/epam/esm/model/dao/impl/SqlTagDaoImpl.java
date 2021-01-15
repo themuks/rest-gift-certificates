@@ -4,7 +4,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
-import com.epam.esm.model.dao.Sorter;
+import com.epam.esm.model.dao.QuerySorter;
 import com.epam.esm.model.dao.TagDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -94,12 +94,13 @@ public class SqlTagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> findAll() throws DaoException {
-        return findAll(new Sorter());
+        return findAll(new QuerySorter());
     }
 
     @Override
-    public List<Tag> findAll(Sorter sorter) throws DaoException {
-        List<Tag> tags = jdbcTemplate.query(sorter.prepareQuery(FIND_ALL_QUERY),  new TagRowMapper());
+    public List<Tag> findAll(QuerySorter querySorter) throws DaoException {
+        List<Tag> tags = jdbcTemplate.query(querySorter.prepareQuery(FIND_ALL_QUERY), new TagRowMapper());
+        System.out.println(querySorter.prepareQuery(FIND_ALL_QUERY));
         for (Tag tag : tags) {
             List<GiftCertificate> giftCertificates = giftCertificateDao.findByTagId(tag.getId());
             tag.setGiftCertificates(giftCertificates);

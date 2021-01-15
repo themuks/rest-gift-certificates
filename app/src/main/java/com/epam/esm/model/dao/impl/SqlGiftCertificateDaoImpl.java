@@ -4,7 +4,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
-import com.epam.esm.model.dao.Sorter;
+import com.epam.esm.model.dao.QuerySorter;
 import com.epam.esm.model.dao.TagDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -91,12 +91,12 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findAll() throws DaoException {
-        return findAll(new Sorter());
+        return findAll(new QuerySorter());
     }
 
     @Override
-    public List<GiftCertificate> findAll(Sorter sorter) throws DaoException {
-        List<GiftCertificate> giftCertificates = jdbcTemplate.query(sorter.prepareQuery(FIND_ALL_QUERY), new GiftCertificateRowMapper());
+    public List<GiftCertificate> findAll(QuerySorter querySorter) throws DaoException {
+        List<GiftCertificate> giftCertificates = jdbcTemplate.query(querySorter.prepareQuery(FIND_ALL_QUERY), new GiftCertificateRowMapper());
         for (GiftCertificate giftCertificate : giftCertificates) {
             List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId());
             giftCertificate.setTags(tags);
@@ -160,12 +160,12 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findByTagName(String tagName) throws DaoException {
-        return findByTagName(tagName, new Sorter());
+        return findByTagName(tagName, new QuerySorter());
     }
 
     @Override
-    public List<GiftCertificate> findByTagName(String tagName, Sorter sorter) throws DaoException {
-        List<GiftCertificate> giftCertificates = jdbcTemplate.query(FIND_BY_TAG_NAME_QUERY, new GiftCertificateRowMapper(), tagName);
+    public List<GiftCertificate> findByTagName(String tagName, QuerySorter querySorter) throws DaoException {
+        List<GiftCertificate> giftCertificates = jdbcTemplate.query(querySorter.prepareQuery(FIND_BY_TAG_NAME_QUERY), new GiftCertificateRowMapper(), tagName);
         for (GiftCertificate giftCertificate : giftCertificates) {
             List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId());
             giftCertificate.setTags(tags);

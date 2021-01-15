@@ -9,5 +9,5 @@ public interface GiftCertificateDao extends BaseDao<GiftCertificate> {
 
     List<GiftCertificate> findByTagName(String tagName) throws DaoException;
 
-    List<GiftCertificate> findByTagName(String tagName, Sorter sorter) throws DaoException;
+    List<GiftCertificate> findByTagName(String tagName, QuerySorter querySorter) throws DaoException;
 }

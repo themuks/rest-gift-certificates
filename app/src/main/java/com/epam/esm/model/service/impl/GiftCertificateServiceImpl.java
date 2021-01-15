@@ -3,7 +3,7 @@ package com.epam.esm.model.service.impl;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
-import com.epam.esm.model.dao.Sorter;
+import com.epam.esm.model.dao.QuerySorter;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.springframework.stereotype.Service;
@@ -33,19 +33,19 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             return giftCertificateDao.findById(id);
         } catch (DaoException e) {
-            throw new ServiceException("Error while finding gift certificate by id");
+            throw new ServiceException("Error while finding gift certificate by id", e);
         }
     }
 
     @Override
     public List<GiftCertificate> findAll() throws ServiceException {
-        return findAll(new Sorter());
+        return findAll(new QuerySorter());
     }
 
     @Override
-    public List<GiftCertificate> findAll(Sorter sorter) throws ServiceException {
+    public List<GiftCertificate> findAll(QuerySorter querySorter) throws ServiceException {
         try {
-            return giftCertificateDao.findAll(sorter);
+            return giftCertificateDao.findAll(querySorter);
         } catch (DaoException e) {
             throw new ServiceException("Error while finding all gift certificates", e);
         }
@@ -71,13 +71,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public List<GiftCertificate> findByTagName(String tagName) throws ServiceException {
-        return findByTagName(tagName, new Sorter());
+        return findByTagName(tagName, new QuerySorter());
     }
 
     @Override
-    public List<GiftCertificate> findByTagName(String tagName, Sorter sorter) throws ServiceException {
+    public List<GiftCertificate> findByTagName(String tagName, QuerySorter querySorter) throws ServiceException {
         try {
-            return giftCertificateDao.findByTagName(tagName, sorter);
+            return giftCertificateDao.findByTagName(tagName, querySorter);
         } catch (DaoException e) {
             throw new ServiceException("Error while finding gift certificate by tag name", e);
         }

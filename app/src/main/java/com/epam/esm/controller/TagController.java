@@ -1,11 +1,12 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.model.dao.Sorter;
+import com.epam.esm.model.dao.QuerySorter;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -15,7 +16,6 @@ import java.util.List;
 @RequestMapping("/tags")
 public class TagController {
     private final static Logger log = Logger.getLogger(TagController.class);
-    private static final String DESC = "DESC";
     private final TagService tagService;
 
     public TagController(TagService tagService) {
@@ -23,15 +23,10 @@ public class TagController {
     }
 
     @GetMapping()
-    public List<Tag> findAll(@RequestAttribute(required = false) String sortType,
-                             @RequestAttribute(required = false) String fieldName) {
-        Sorter sorter = new Sorter();
-        sorter.setFieldName(fieldName);
-        if (DESC.equals(sortType)) {
-            sorter.setDescending();
-        }
+    public List<Tag> findAll(@RequestParam(required = false) MultiValueMap<String, String> sort) {
+        QuerySorter querySorter = new QuerySorter(sort);
         try {
-            return tagService.findAll(sorter);
+            return tagService.findAll(querySorter);
         } catch (ServiceException e) {
             log.error("Error while finding all tags", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
