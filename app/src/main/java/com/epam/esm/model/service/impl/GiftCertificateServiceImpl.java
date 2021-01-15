@@ -3,7 +3,7 @@ package com.epam.esm.model.service.impl;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
-import com.epam.esm.model.dao.QuerySorter;
+import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.springframework.stereotype.Service;
@@ -39,13 +39,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public List<GiftCertificate> findAll() throws ServiceException {
-        return findAll(new QuerySorter());
+        return findAll(new QueryCustomizer());
     }
 
     @Override
-    public List<GiftCertificate> findAll(QuerySorter querySorter) throws ServiceException {
+    public List<GiftCertificate> findAll(QueryCustomizer queryCustomizer) throws ServiceException {
         try {
-            return giftCertificateDao.findAll(querySorter);
+            return giftCertificateDao.findAll(queryCustomizer);
         } catch (DaoException e) {
             throw new ServiceException("Error while finding all gift certificates", e);
         }
@@ -71,13 +71,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public List<GiftCertificate> findByTagName(String tagName) throws ServiceException {
-        return findByTagName(tagName, new QuerySorter());
+        return findByTagName(tagName, new QueryCustomizer());
     }
 
     @Override
-    public List<GiftCertificate> findByTagName(String tagName, QuerySorter querySorter) throws ServiceException {
+    public List<GiftCertificate> findByTagName(String tagName, QueryCustomizer queryCustomizer) throws ServiceException {
         try {
-            return giftCertificateDao.findByTagName(tagName, querySorter);
+            return giftCertificateDao.findByTagName(tagName, queryCustomizer);
         } catch (DaoException e) {
             throw new ServiceException("Error while finding gift certificate by tag name", e);
         }

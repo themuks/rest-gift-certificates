@@ -4,7 +4,7 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
-import com.epam.esm.model.dao.QuerySorter;
+import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.dao.TagDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -91,12 +91,12 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findAll() throws DaoException {
-        return findAll(new QuerySorter());
+        return findAll(new QueryCustomizer());
     }
 
     @Override
-    public List<GiftCertificate> findAll(QuerySorter querySorter) throws DaoException {
-        List<GiftCertificate> giftCertificates = jdbcTemplate.query(querySorter.prepareQuery(FIND_ALL_QUERY), new GiftCertificateRowMapper());
+    public List<GiftCertificate> findAll(QueryCustomizer queryCustomizer) throws DaoException {
+        List<GiftCertificate> giftCertificates = jdbcTemplate.query(queryCustomizer.prepareQuery(FIND_ALL_QUERY), new GiftCertificateRowMapper());
         for (GiftCertificate giftCertificate : giftCertificates) {
             List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId());
             giftCertificate.setTags(tags);
@@ -160,17 +160,38 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
 
     @Override
     public List<GiftCertificate> findByTagName(String tagName) throws DaoException {
-        return findByTagName(tagName, new QuerySorter());
+        return findByTagName(tagName, new QueryCustomizer());
     }
 
     @Override
-    public List<GiftCertificate> findByTagName(String tagName, QuerySorter querySorter) throws DaoException {
-        List<GiftCertificate> giftCertificates = jdbcTemplate.query(querySorter.prepareQuery(FIND_BY_TAG_NAME_QUERY), new GiftCertificateRowMapper(), tagName);
+    public List<GiftCertificate> findByTagName(String tagName, QueryCustomizer queryCustomizer) throws DaoException {
+        List<GiftCertificate> giftCertificates = jdbcTemplate.query(queryCustomizer.prepareQuery(FIND_BY_TAG_NAME_QUERY), new GiftCertificateRowMapper(), tagName);
         for (GiftCertificate giftCertificate : giftCertificates) {
             List<Tag> tags = tagDao.findByGiftCertificateId(giftCertificate.getId());
             giftCertificate.setTags(tags);
         }
         return giftCertificates;
+    }
+
+    private void addNestedTags(GiftCertificate giftCertificate) throws DaoException {
+        if (giftCertificate.getTags() != null) {
+            for (Tag tag : giftCertificate.getTags()) {
+                try {
+                    if (tag.getId() == null) {
+                        long generatedTagId = tagDao.add(tag);
+                        tag.setId(generatedTagId);
+                    } else {
+                        if (tagDao.findById(tag.getId()).isEmpty()) {
+                            long generatedTagId = tagDao.add(tag);
+                            tag.setId(generatedTagId);
+                        }
+                    }
+                    jdbcTemplate.update(INSERT_INTO_REF_TABLE_QUERY, giftCertificate.getId(), tag.getId());
+                } catch (DaoException e) {
+                    throw new DaoException("Error while adding tag", e);
+                }
+            }
+        }
     }
 
     private class GiftCertificateRowMapper implements RowMapper<GiftCertificate> {
@@ -190,26 +211,6 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
                             ? rs.getTimestamp(7).toLocalDateTime()
                             : null)
                     .build();
-        }
-    }
-    private void addNestedTags(GiftCertificate giftCertificate) throws DaoException {
-        if (giftCertificate.getTags() != null) {
-            for (Tag tag : giftCertificate.getTags()) {
-                try {
-                    if (tag.getId() == null) {
-                        long generatedTagId = tagDao.add(tag);
-                        tag.setId(generatedTagId);
-                    } else {
-                        if (tagDao.findById(tag.getId()).isEmpty()) {
-                            long generatedTagId = tagDao.add(tag);
-                            tag.setId(generatedTagId);
-                        }
-                    }
-                    jdbcTemplate.update(INSERT_INTO_REF_TABLE_QUERY, giftCertificate.getId(), tag.getId());
-                } catch (DaoException e) {
-                    throw new DaoException("Error while adding tag", e);
-                }
-            }
         }
     }
 }

@@ -2,7 +2,7 @@ package com.epam.esm.model.service.impl;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
-import com.epam.esm.model.dao.QuerySorter;
+import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
@@ -39,13 +39,13 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> findAll() throws ServiceException {
-        return findAll(new QuerySorter());
+        return findAll(new QueryCustomizer());
     }
 
     @Override
-    public List<Tag> findAll(QuerySorter querySorter) throws ServiceException {
+    public List<Tag> findAll(QueryCustomizer queryCustomizer) throws ServiceException {
         try {
-            return tagDao.findAll(querySorter);
+            return tagDao.findAll(queryCustomizer);
         } catch (DaoException e) {
             throw new ServiceException("Error while finding all gift certificates", e);
         }

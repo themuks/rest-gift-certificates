@@ -10,7 +10,7 @@ public interface BaseDao<T> {
 
     List<T> findAll() throws DaoException;
 
-    List<T> findAll(QuerySorter querySorter) throws DaoException;
+    List<T> findAll(QueryCustomizer queryCustomizer) throws DaoException;
 
     void update(long id, T t) throws DaoException;
 

@@ -1,7 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.model.dao.QuerySorter;
+import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import org.apache.log4j.Logger;
@@ -24,9 +24,9 @@ public class TagController {
 
     @GetMapping()
     public List<Tag> findAll(@RequestParam(required = false) MultiValueMap<String, String> sort) {
-        QuerySorter querySorter = new QuerySorter(sort);
+        QueryCustomizer queryCustomizer = new QueryCustomizer(sort);
         try {
-            return tagService.findAll(querySorter);
+            return tagService.findAll(queryCustomizer);
         } catch (ServiceException e) {
             log.error("Error while finding all tags", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);

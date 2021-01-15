@@ -1,7 +1,7 @@
 package com.epam.esm.model.service;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.model.dao.QuerySorter;
+import com.epam.esm.model.dao.QueryCustomizer;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,7 +13,7 @@ public interface TagService {
 
     List<Tag> findAll() throws ServiceException;
 
-    List<Tag> findAll(QuerySorter querySorter) throws ServiceException;
+    List<Tag> findAll(QueryCustomizer queryCustomizer) throws ServiceException;
 
     void delete(long id) throws ServiceException;
 }

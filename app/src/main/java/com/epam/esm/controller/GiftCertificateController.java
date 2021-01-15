@@ -1,7 +1,7 @@
 package com.epam.esm.controller;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.model.dao.QuerySorter;
+import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.apache.log4j.Logger;
@@ -23,11 +23,10 @@ public class GiftCertificateController {
     }
 
     @GetMapping()
-    public List<GiftCertificate> findAll(@RequestParam(required = false) MultiValueMap<String, String> sort) {
-        System.out.println(sort);
-        QuerySorter querySorter = new QuerySorter(sort);
+    public List<GiftCertificate> findAll(@RequestParam(required = false) MultiValueMap<String, String> parameters) {
+        QueryCustomizer queryCustomizer = new QueryCustomizer(parameters);
         try {
-            return giftCertificateService.findAll(querySorter);
+            return giftCertificateService.findAll(queryCustomizer);
         } catch (ServiceException e) {
             log.error("Error while finding all gift certificates", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -76,10 +75,10 @@ public class GiftCertificateController {
 
     @GetMapping("/tag/{tagName}")
     public List<GiftCertificate> findByTagName(@PathVariable String tagName,
-                                               @RequestParam(required = false) MultiValueMap<String, String> sort) {
-        QuerySorter querySorter = new QuerySorter(sort);
+                                               @RequestParam(required = false) MultiValueMap<String, String> parameters) {
+        QueryCustomizer queryCustomizer = new QueryCustomizer(parameters);
         try {
-            return giftCertificateService.findByTagName(tagName, querySorter);
+            return giftCertificateService.findByTagName(tagName, queryCustomizer);
         } catch (ServiceException e) {
             log.error("Error while finding gift certificate by tag name", e);
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
