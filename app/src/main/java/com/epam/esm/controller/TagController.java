@@ -1,14 +1,14 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.controller.exception.EntityNotFoundException;
+import com.epam.esm.controller.exception.ServerInternalErrorException;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import org.apache.log4j.Logger;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -16,6 +16,7 @@ import java.util.List;
 @RequestMapping("/tags")
 public class TagController {
     private final static Logger log = Logger.getLogger(TagController.class);
+    private static final String TAG_ENTITY_CODE = "02";
     private final TagService tagService;
 
     public TagController(TagService tagService) {
@@ -29,17 +30,17 @@ public class TagController {
             return tagService.findAll(queryCustomizer);
         } catch (ServiceException e) {
             log.error("Error while finding all tags", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
     }
 
     @GetMapping("/{id}")
     public Tag findById(@PathVariable long id) {
         try {
-            return tagService.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+            return tagService.findById(id).orElseThrow(() -> new EntityNotFoundException(id, TAG_ENTITY_CODE));
         } catch (ServiceException e) {
             log.error("Error while finding tag by id", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
     }
 
@@ -49,7 +50,7 @@ public class TagController {
             tagService.add(tag);
         } catch (ServiceException e) {
             log.error("Error while adding tag", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
     }
 
@@ -59,7 +60,7 @@ public class TagController {
             tagService.delete(id);
         } catch (ServiceException e) {
             log.error("Error while deleting tag", e);
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
     }
 }

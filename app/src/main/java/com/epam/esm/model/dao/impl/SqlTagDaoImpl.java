@@ -105,7 +105,7 @@ public class SqlTagDaoImpl implements TagDao {
     }
 
     @Override
-    public void update(long id, Tag tag) throws DaoException {
+    public void update(long id, Tag tag) {
         throw new UnsupportedOperationException();
     }
 
@@ -115,11 +115,11 @@ public class SqlTagDaoImpl implements TagDao {
     }
 
     @Override
-    public List<Tag> findByGiftCertificateId(long id) throws DaoException {
+    public List<Tag> findByGiftCertificateId(long id) {
         return jdbcTemplate.query(FIND_BY_GIFT_CERTIFICATE_ID_QUERY, new TagRowMapper(), id);
     }
 
-    private class TagRowMapper implements RowMapper<Tag> {
+    private static class TagRowMapper implements RowMapper<Tag> {
         @Override
         public Tag mapRow(ResultSet rs, int rowNum) throws SQLException {
             return Tag.builder()

@@ -156,7 +156,7 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
         jdbcTemplate.update(DELETE_QUERY, id);
     }
 
-    public List<GiftCertificate> findByTagId(long id) throws DaoException {
+    public List<GiftCertificate> findByTagId(long id) {
         return jdbcTemplate.query(FIND_BY_TAG_ID_QUERY, new GiftCertificateRowMapper(), id);
     }
 
@@ -179,6 +179,7 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
         if (giftCertificate.getTags() != null) {
             for (Tag tag : giftCertificate.getTags()) {
                 try {
+                    // Adding tag into database if id is passed and such tag is not exist
                     if (tag.getId() == null) {
                         long generatedTagId = tagDao.add(tag);
                         tag.setId(generatedTagId);
@@ -196,7 +197,7 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
         }
     }
 
-    private class GiftCertificateRowMapper implements RowMapper<GiftCertificate> {
+    private static class GiftCertificateRowMapper implements RowMapper<GiftCertificate> {
         @Override
         public GiftCertificate mapRow(ResultSet rs, int rowNum) throws SQLException {
             return GiftCertificate.builder()
