@@ -6,6 +6,7 @@ import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
+import com.epam.esm.model.service.validator.EntityValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,6 +22,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public long add(Tag tag) throws ServiceException {
+        if (tag == null) {
+            throw new IllegalArgumentException("The supplied [Tag] is " +
+                    "required and must not be null");
+        }
         try {
             return tagDao.add(tag);
         } catch (DaoException e) {
@@ -30,6 +35,9 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public Optional<Tag> findById(long id) throws ServiceException {
+        if (!EntityValidator.isIdValid(id)) {
+            throw new IllegalArgumentException("Id must be positive");
+        }
         try {
             return tagDao.findById(id);
         } catch (DaoException e) {
@@ -44,6 +52,10 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> findAll(QueryCustomizer queryCustomizer) throws ServiceException {
+        if (queryCustomizer == null) {
+            throw new IllegalArgumentException("The supplied [QueryCustomizer] is " +
+                    "required and must not be null");
+        }
         try {
             return tagDao.findAll(queryCustomizer);
         } catch (DaoException e) {
@@ -53,6 +65,9 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public void delete(long id) throws ServiceException {
+        if (!EntityValidator.isIdValid(id)) {
+            throw new IllegalArgumentException("Id must be positive");
+        }
         try {
             tagDao.delete(id);
         } catch (DaoException e) {

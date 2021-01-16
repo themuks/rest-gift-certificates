@@ -8,6 +8,7 @@ import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.apache.log4j.Logger;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.Validator;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +21,11 @@ public class GiftCertificateController {
     private static final Logger log = Logger.getLogger(GiftCertificateController.class);
     private static final String GIFT_CERTIFICATE_ENTITY_CODE = "01";
     private final GiftCertificateService giftCertificateService;
+    private final Validator giftCertificateValidator;
 
-    public GiftCertificateController(GiftCertificateService giftCertificateService) {
+    public GiftCertificateController(GiftCertificateService giftCertificateService, Validator giftCertificateValidator) {
         this.giftCertificateService = giftCertificateService;
+        this.giftCertificateValidator = giftCertificateValidator;
     }
 
     @GetMapping()
