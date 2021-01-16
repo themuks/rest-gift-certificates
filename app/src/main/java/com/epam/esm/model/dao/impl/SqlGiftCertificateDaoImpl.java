@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.*;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Transactional
 public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
     private static final String INSERT_QUERY =
             "INSERT INTO gift_certificate " +
@@ -195,7 +197,6 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
     }
 
     private class GiftCertificateRowMapper implements RowMapper<GiftCertificate> {
-
         @Override
         public GiftCertificate mapRow(ResultSet rs, int rowNum) throws SQLException {
             return GiftCertificate.builder()

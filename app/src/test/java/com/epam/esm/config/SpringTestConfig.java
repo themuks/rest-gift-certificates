@@ -6,10 +6,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
 @ComponentScan("com.epam.esm.model.dao.impl")
 @Import(DatabaseTestConfig.class)
+@EnableTransactionManagement
 public class SpringTestConfig {
     private final DatabaseTestConfig databaseTestConfig;
 

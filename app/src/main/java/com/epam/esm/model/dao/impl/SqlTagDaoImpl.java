@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
+@Transactional
 public class SqlTagDaoImpl implements TagDao {
     private static final String INSERT_QUERY = "INSERT INTO tag (name) VALUES (?)";
     private static final String INSERT_INTO_REF_TABLE_QUERY =
@@ -32,11 +34,6 @@ public class SqlTagDaoImpl implements TagDao {
     private static final String FIND_BY_GIFT_CERTIFICATE_ID_QUERY =
             "SELECT id, name FROM tag WHERE id IN " +
                     "(SELECT tag_id FROM gift_certificate_has_tag WHERE gift_certificate_id = ?)";
-    private static final String DELETE_REF_DATA_QUERY =
-            "DELETE FROM gift_certificate WHERE id IN " +
-                    "(SELECT gift_certificate.id FROM (SELECT gc.id FROM gift_certificate gc " +
-                    "INNER JOIN gift_certificate_has_tag gcht ON gc.id = gcht.gift_certificate_id " +
-                    "INNER JOIN tag t ON gcht.tag_id = t.id WHERE tag_id = ?) as t)";
     private static final String DELETE_QUERY = "DELETE FROM tag WHERE id = ?";
     private final JdbcTemplate jdbcTemplate;
     private GiftCertificateDao giftCertificateDao;
