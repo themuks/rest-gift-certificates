@@ -4,9 +4,9 @@ import com.epam.esm.config.SpringTestConfig;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
-import com.epam.esm.model.dao.TagDao;
-import org.apache.log4j.Logger;
+import com.epam.esm.model.dao.GiftCertificateDao;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +30,18 @@ import static org.junit.jupiter.api.Assertions.*;
 @Transactional
 @Rollback
 class SqlTagDaoImplTest {
-    private static final Logger log = Logger.getLogger(SqlGiftCertificateDaoImplTest.class);
     @Autowired
-    private TagDao tagDao;
+    private DataSource dataSource;
+    private SqlTagDaoImpl tagDao;
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
-    public void setJdbcTemplate(DataSource dataSource) {
-        this.jdbcTemplate = new JdbcTemplate(dataSource);
+    private GiftCertificateDao giftCertificateDao;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate = new JdbcTemplate(dataSource);
+        tagDao = new SqlTagDaoImpl(dataSource);
+        tagDao.setGiftCertificateDao(giftCertificateDao);
     }
 
     @AfterEach

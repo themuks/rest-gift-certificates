@@ -47,7 +47,11 @@ public class TagServiceImpl implements TagService {
 
     @Override
     public List<Tag> findAll() throws ServiceException {
-        return findAll(new QueryCustomizer());
+        try {
+            return tagDao.findAll();
+        } catch (DaoException e) {
+            throw new ServiceException("Error while finding all gift certificates", e);
+        }
     }
 
     @Override

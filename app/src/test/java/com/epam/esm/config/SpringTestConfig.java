@@ -9,7 +9,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @Configuration
-@ComponentScan("com.epam.esm.model.dao.impl")
+@ComponentScan(basePackages = {"com.epam.esm.model.dao.impl", "com.epam.esm.model.service.impl"})
 @Import(DatabaseTestConfig.class)
 @EnableTransactionManagement
 public class SpringTestConfig {

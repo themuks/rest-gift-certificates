@@ -47,7 +47,11 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     @Override
     public List<GiftCertificate> findAll() throws ServiceException {
-        return findAll(new QueryCustomizer());
+        try {
+            return giftCertificateDao.findAll();
+        } catch (DaoException e) {
+            throw new ServiceException("Error while finding all gift certificates", e);
+        }
     }
 
     @Override
@@ -97,7 +101,11 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             throw new IllegalArgumentException("The supplied [String] is " +
                     "required and must not be null");
         }
-        return findByTagName(tagName, new QueryCustomizer());
+        try {
+            return giftCertificateDao.findByTagName(tagName);
+        } catch (DaoException e) {
+            throw new ServiceException("Error while finding gift certificate by tag name", e);
+        }
     }
 
     @Override
