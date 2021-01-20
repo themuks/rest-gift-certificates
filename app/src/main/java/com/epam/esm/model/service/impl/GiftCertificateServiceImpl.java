@@ -7,7 +7,13 @@ import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.validator.EntityValidator;
+import com.epam.esm.model.service.validator.GiftCertificateValidator;
+import com.epam.esm.model.service.validator.ProxyGiftCertificateValidator;
+import com.epam.esm.model.service.validator.TagValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
+import org.springframework.validation.Validator;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +21,7 @@ import java.util.Optional;
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
+    private final Validator giftCertificateValidator = new GiftCertificateValidator(new TagValidator());
 
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao) {
         this.giftCertificateDao = giftCertificateDao;
@@ -25,6 +32,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         if (giftCertificate == null) {
             throw new IllegalArgumentException("The supplied [GiftCertificate] is " +
                     "required and must not be null");
+        }
+        DataBinder dataBinder = new DataBinder(giftCertificate);
+        ProxyGiftCertificateValidator proxyValidator = new ProxyGiftCertificateValidator(new TagValidator());
+        dataBinder.addValidators(proxyValidator);
+        dataBinder.validate();
+        BindingResult bindingResult = dataBinder.getBindingResult();
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid fields");
         }
         try {
             return giftCertificateDao.add(giftCertificate);
@@ -75,6 +90,13 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         if (giftCertificate == null) {
             throw new IllegalArgumentException("The supplied [GiftCertificate] is " +
                     "required and must not be null");
+        }
+        DataBinder dataBinder = new DataBinder(giftCertificate);
+        dataBinder.addValidators(giftCertificateValidator);
+        dataBinder.validate();
+        BindingResult bindingResult = dataBinder.getBindingResult();
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid fields");
         }
         try {
             giftCertificateDao.update(id, giftCertificate);

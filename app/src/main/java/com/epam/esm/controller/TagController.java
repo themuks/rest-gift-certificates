@@ -7,8 +7,10 @@ import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import org.apache.log4j.Logger;
+import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -46,6 +48,9 @@ public class TagController {
 
     @PostMapping("/add")
     public void add(@RequestBody Tag tag) {
+        if (tag == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag required and must be not null");
+        }
         try {
             tagService.add(tag);
         } catch (ServiceException e) {

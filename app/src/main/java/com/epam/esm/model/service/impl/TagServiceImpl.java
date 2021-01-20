@@ -7,7 +7,11 @@ import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import com.epam.esm.model.service.validator.EntityValidator;
+import com.epam.esm.model.service.validator.TagValidator;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
+import org.springframework.validation.Validator;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,6 +19,7 @@ import java.util.Optional;
 @Service
 public class TagServiceImpl implements TagService {
     private final TagDao tagDao;
+    private final Validator tagValidator = new TagValidator();
 
     public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;
@@ -25,6 +30,13 @@ public class TagServiceImpl implements TagService {
         if (tag == null) {
             throw new IllegalArgumentException("The supplied [Tag] is " +
                     "required and must not be null");
+        }
+        DataBinder dataBinder = new DataBinder(tag);
+        dataBinder.addValidators(tagValidator);
+        dataBinder.validate();
+        BindingResult bindingResult = dataBinder.getBindingResult();
+        if (bindingResult.hasErrors()) {
+            throw new IllegalArgumentException("The supplied [Tag] has invalid fields");
         }
         try {
             return tagDao.add(tag);

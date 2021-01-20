@@ -11,6 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,9 +33,19 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void add_ValidGiftCertificateGiven_ShouldReturnGeneratedId() throws DaoException {
+        LocalDateTime dateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .name("name")
+                .description("description")
+                .price(new BigDecimal(123))
+                .duration(1)
+                .createDate(dateTime)
+                .lastUpdateDate(dateTime.minusDays(1))
+                .tags(new ArrayList<>())
+                .build();
         when(giftCertificateDao.add(any(GiftCertificate.class))).thenReturn(1L);
         try {
-            long actual = giftCertificateService.add(new GiftCertificate());
+            long actual = giftCertificateService.add(giftCertificate);
             long expected = 1L;
             assertEquals(expected, actual);
         } catch (ServiceException e) {
@@ -46,12 +59,27 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
+    void add_InvalidGiftCertificateGiven_ShouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.add(new GiftCertificate()));
+    }
+
+    @Test
     void add_DaoExceptionThrown_ShouldThrowServiceException() {
         try {
             when(giftCertificateDao.add(any(GiftCertificate.class))).thenThrow(new DaoException());
         } catch (DaoException ignored) {
         }
-        assertThrows(ServiceException.class, () -> giftCertificateService.add(new GiftCertificate()));
+        LocalDateTime dateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .name("name")
+                .description("description")
+                .price(new BigDecimal(123))
+                .duration(1)
+                .createDate(dateTime)
+                .lastUpdateDate(dateTime.minusDays(1))
+                .tags(new ArrayList<>())
+                .build();
+        assertThrows(ServiceException.class, () -> giftCertificateService.add(giftCertificate));
     }
 
     @Test
@@ -60,7 +88,7 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void findById_ValidIdGivenObjectNotExist_ShouldReturnOptionalWithObject() throws DaoException {
+    void findById_ValidIdGivenObjectExists_ShouldReturnOptionalWithObject() throws DaoException {
         when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.of(new GiftCertificate()));
         try {
             Optional<GiftCertificate> actual = giftCertificateService.findById(1);
@@ -72,7 +100,7 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void findById_ValidIdGivenObjectExists_ShouldReturnEmptyOptional() throws DaoException {
+    void findById_ValidIdGivenObjectNotExist_ShouldReturnEmptyOptional() throws DaoException {
         when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.empty());
         try {
             Optional<GiftCertificate> actual = giftCertificateService.findById(1);
@@ -179,12 +207,12 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void delete_InvalidIdGiven_ShouldReturnIllegalArgumentException() {
+    void delete_InvalidIdGiven_ShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> giftCertificateService.delete(-1));
     }
 
     @Test
-    void delete_DaoExceptionThrown_ShouldReturnServiceException() throws DaoException {
+    void delete_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
         doThrow(new DaoException()).when(giftCertificateDao).delete(anyLong());
         assertThrows(ServiceException.class, () -> giftCertificateService.delete(1));
     }

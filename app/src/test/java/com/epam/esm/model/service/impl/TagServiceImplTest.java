@@ -32,9 +32,12 @@ class TagServiceImplTest {
 
     @Test
     void add_ValidTagGiven_ShouldReturnGeneratedId() throws DaoException {
+        Tag tag = Tag.builder()
+                .name("name")
+                .build();
         when(tagDao.add(any(Tag.class))).thenReturn(1L);
         try {
-            long actual = tagService.add(new Tag());
+            long actual = tagService.add(tag);
             long expected = 1L;
             assertEquals(expected, actual);
         } catch (ServiceException e) {
@@ -48,12 +51,20 @@ class TagServiceImplTest {
     }
 
     @Test
+    void add_InvalidTagGiven_ShouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class, () -> tagService.add(new Tag()));
+    }
+
+    @Test
     void add_DaoExceptionThrown_ShouldThrowServiceException() {
+        Tag tag = Tag.builder()
+                .name("name")
+                .build();
         try {
             when(tagDao.add(any(Tag.class))).thenThrow(new DaoException());
         } catch (DaoException ignored) {
         }
-        assertThrows(ServiceException.class, () -> tagService.add(new Tag()));
+        assertThrows(ServiceException.class, () -> tagService.add(tag));
     }
 
     @Test
@@ -62,7 +73,7 @@ class TagServiceImplTest {
     }
 
     @Test
-    void findById_ValidIdGivenObjectNotExist_ShouldReturnOptionalWithObject() throws DaoException {
+    void findById_ValidIdGivenObjectExists_ShouldReturnOptionalWithObject() throws DaoException {
         when(tagDao.findById(anyLong())).thenReturn(Optional.of(new Tag()));
         try {
             Optional<Tag> actual = tagService.findById(1);
@@ -74,7 +85,7 @@ class TagServiceImplTest {
     }
 
     @Test
-    void findById_ValidIdGivenObjectExists_ShouldReturnEmptyOptional() throws DaoException {
+    void findById_ValidIdGivenObjectNotExist_ShouldReturnEmptyOptional() throws DaoException {
         when(tagDao.findById(anyLong())).thenReturn(Optional.empty());
         try {
             Optional<Tag> actual = tagService.findById(1);
@@ -153,12 +164,12 @@ class TagServiceImplTest {
     }
 
     @Test
-    void delete_InvalidIdGiven_ShouldReturnIllegalArgumentException() {
+    void delete_InvalidIdGiven_ShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> tagService.delete(-1));
     }
 
     @Test
-    void delete_DaoExceptionThrown_ShouldReturnServiceException() throws DaoException {
+    void delete_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
         doThrow(new DaoException()).when(tagDao).delete(anyLong());
         assertThrows(ServiceException.class, () -> tagService.delete(1));
     }
