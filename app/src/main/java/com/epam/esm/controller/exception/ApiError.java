@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * Thrown to indicate that request to controller has errors
+ */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor

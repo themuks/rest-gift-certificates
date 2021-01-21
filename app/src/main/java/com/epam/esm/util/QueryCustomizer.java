@@ -2,7 +2,6 @@ package com.epam.esm.util;
 
 import com.epam.esm.util.entity.SearchUnit;
 import com.epam.esm.util.entity.SortUnit;
-import lombok.ToString;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;
 
@@ -10,8 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 
+/**
+ * The type Query customizer. Used for modifying sql queries to sort information by provided fields with different
+ * methods and search by specific fields with specific way (see {@link SearchUnit} and {@link SortUnit}).
+ */
 @Component
-@ToString
 public class QueryCustomizer {
     private static final String COMMA_DELIMITER = ", ";
     private static final String ORDER_BY_PREFIX = "ORDER BY ";
@@ -31,14 +33,29 @@ public class QueryCustomizer {
     private List<SortUnit> sortUnits;
     private List<SearchUnit> searchUnits;
 
+    /**
+     * Instantiates a new Query customizer.
+     */
     public QueryCustomizer() {
     }
 
+    /**
+     * Instantiates a new Query customizer.
+     *
+     * @param sortUnits   the sort units
+     * @param searchUnits the search units
+     */
     public QueryCustomizer(List<SortUnit> sortUnits, List<SearchUnit> searchUnits) {
         this.sortUnits = sortUnits;
         this.searchUnits = searchUnits;
     }
 
+    /**
+     * Instantiates a new Query customizer.
+     *
+     * @param sortMap the sort map which contains search field names, sort field names,
+     *                field search expression and field sort type
+     */
     public QueryCustomizer(MultiValueMap<String, String> sortMap) {
         if (sortMap == null) {
             return;
@@ -47,11 +64,17 @@ public class QueryCustomizer {
         prepareSearchFields(sortMap);
     }
 
+    /**
+     * Prepare query string by adding {@code ORDER BY} and {@code LIKE} instructions, if necessary,
+     * to the end of query.
+     *
+     * @param sql sql query
+     * @return result sql query
+     */
     public String prepareQuery(String sql) {
         String searchOperation = generateSearchOperation();
         String sortOperation = generateSortOperation();
-        String resultQuery = String.format(RESULT_FORMAT, sql, searchOperation, sortOperation);
-        return resultQuery;
+        return String.format(RESULT_FORMAT, sql, searchOperation, sortOperation);
     }
 
     private String generateSortOperation() {
@@ -88,7 +111,7 @@ public class QueryCustomizer {
         if (sortFields == null || sortTypes == null) {
             return;
         }
-        List<SortUnit> sortUnits = new ArrayList<>();
+        sortUnits = new ArrayList<>();
         int size = sortFields.size();
         for (int i = 0; i < size; i++) {
             SortUnit sortUnit;
@@ -99,7 +122,6 @@ public class QueryCustomizer {
             }
             sortUnits.add(sortUnit);
         }
-        this.sortUnits = sortUnits;
     }
 
     private void prepareSearchFields(MultiValueMap<String, String> sortMap) {
@@ -108,7 +130,7 @@ public class QueryCustomizer {
         if (searchFields == null || searchExpressions == null) {
             return;
         }
-        List<SearchUnit> searchUnits = new ArrayList<>();
+        searchUnits = new ArrayList<>();
         int size = searchFields.size();
         for (int i = 0; i < size; i++) {
             if (i < searchExpressions.size()) {
@@ -116,6 +138,5 @@ public class QueryCustomizer {
                 searchUnits.add(searchUnit);
             }
         }
-        this.searchUnits = searchUnits;
     }
 }

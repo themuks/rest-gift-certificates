@@ -14,20 +14,36 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * Controller for performing operations with {@link Tag} objects.
+ */
 @RestController
 @RequestMapping("/tags")
 public class TagController {
-    private final static Logger log = Logger.getLogger(TagController.class);
+    private static final Logger log = Logger.getLogger(TagController.class);
     private static final String TAG_ENTITY_CODE = "02";
     private final TagService tagService;
 
+    /**
+     * Instantiates a new Tag controller.
+     *
+     * @param tagService the tag service
+     */
     public TagController(TagService tagService) {
         this.tagService = tagService;
     }
 
+    /**
+     * Finds all {@link Tag} objects. There is ability to provide {@code MultiValueMap<String, String>}
+     * to sort or search objects (for more information see {@link QueryCustomizer}).
+     *
+     * @param parameters the parameters
+     * @return list of {@link Tag} objects
+     * @throws ServerInternalErrorException if error occurs while finding all {@link Tag} objects
+     */
     @GetMapping()
-    public List<Tag> findAll(@RequestParam(required = false) MultiValueMap<String, String> sort) {
-        QueryCustomizer queryCustomizer = new QueryCustomizer(sort);
+    public List<Tag> findAll(@RequestParam(required = false) MultiValueMap<String, String> parameters) {
+        QueryCustomizer queryCustomizer = new QueryCustomizer(parameters);
         try {
             return tagService.findAll(queryCustomizer);
         } catch (ServiceException e) {
@@ -36,6 +52,13 @@ public class TagController {
         }
     }
 
+    /**
+     * Finds {@link Tag} by id.
+     *
+     * @param id id to search by
+     * @return found tag
+     * @throws ServerInternalErrorException if error occurs while finding {@link Tag} objects by id
+     */
     @GetMapping("/{id}")
     public Tag findById(@PathVariable long id) {
         try {
@@ -46,6 +69,12 @@ public class TagController {
         }
     }
 
+    /**
+     * Adds {@link Tag} to repository.
+     *
+     * @param tag gift certificate to add
+     * @throws ServerInternalErrorException if error occurs while adding {@link Tag} object
+     */
     @PostMapping("/add")
     public void add(@Valid @NotNull @RequestBody Tag tag) {
         try {
@@ -56,6 +85,12 @@ public class TagController {
         }
     }
 
+    /**
+     * Deletes {@link Tag} object with provided id.
+     *
+     * @param id object id to be deleted
+     * @throws ServerInternalErrorException if error occurs while deleting {@link Tag} object
+     */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable long id) {
         try {

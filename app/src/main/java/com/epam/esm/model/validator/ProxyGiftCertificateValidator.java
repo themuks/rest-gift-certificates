@@ -7,6 +7,11 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+/**
+ * ProxyGiftCertificateValidator is a Validator that bases at {@link GiftCertificateValidator} and performs additional
+ * validation if fields are not null, otherwise rejects fields. At the end of validation
+ * {@link GiftCertificateValidator#validate(Object, Errors)} method will be called.
+ */
 @Service
 public class ProxyGiftCertificateValidator implements Validator {
     private final Validator giftCertificateValidator;

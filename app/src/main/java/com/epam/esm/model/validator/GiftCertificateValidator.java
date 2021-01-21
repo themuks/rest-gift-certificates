@@ -11,6 +11,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * GiftCertificateValidator is a Validator for {@link GiftCertificate} objects.
+ * It checks if fields are null, and if they aren't null performs validation for every field.
+ * Result of validation will be stored in {@link Errors} object.
+ */
 @Service
 public class GiftCertificateValidator implements Validator {
     private final Validator tagValidator;

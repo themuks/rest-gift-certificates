@@ -15,6 +15,9 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+/**
+ * Controller for performing operations with {@link GiftCertificate} objects.
+ */
 @RestController
 @RequestMapping("/gift-certificates")
 @Validated
@@ -23,10 +26,23 @@ public class GiftCertificateController {
     private static final String GIFT_CERTIFICATE_ENTITY_CODE = "01";
     private final GiftCertificateService giftCertificateService;
 
+    /**
+     * Instantiates a new Gift certificate controller.
+     *
+     * @param giftCertificateService the gift certificate service
+     */
     public GiftCertificateController(GiftCertificateService giftCertificateService) {
         this.giftCertificateService = giftCertificateService;
     }
 
+    /**
+     * Finds all {@link GiftCertificate} objects. There is ability to provide {@code MultiValueMap<String, String>}
+     * to sort or search objects (for more information see {@link QueryCustomizer}).
+     *
+     * @param parameters the parameters
+     * @return list of {@link GiftCertificate} objects
+     * @throws ServerInternalErrorException if error occurs while finding all {@link GiftCertificate} objects
+     */
     @GetMapping()
     public List<GiftCertificate> findAll(@RequestParam(required = false) MultiValueMap<String, String> parameters) {
         QueryCustomizer queryCustomizer = new QueryCustomizer(parameters);
@@ -38,6 +54,13 @@ public class GiftCertificateController {
         }
     }
 
+    /**
+     * Finds {@link GiftCertificate} by id.
+     *
+     * @param id id to search by
+     * @return found gift certificate
+     * @throws ServerInternalErrorException if error occurs while finding {@link GiftCertificate} objects by id
+     */
     @GetMapping("/{id}")
     public GiftCertificate findById(@PathVariable long id) {
         try {
@@ -48,6 +71,12 @@ public class GiftCertificateController {
         }
     }
 
+    /**
+     * Adds {@link GiftCertificate} to repository.
+     *
+     * @param giftCertificate gift certificate to add
+     * @throws ServerInternalErrorException if error occurs while adding {@link GiftCertificate} object
+     */
     @PostMapping("/add")
     public void add(@Valid @NotNull @RequestBody GiftCertificate giftCertificate) {
         try {
@@ -58,6 +87,14 @@ public class GiftCertificateController {
         }
     }
 
+    /**
+     * Updates {@link GiftCertificate} object with provided id to the supplied object. If supplied object's field
+     * is null therefore it will not be updated.
+     *
+     * @param id    id of object to be updated
+     * @param patch patch object
+     * @throws ServerInternalErrorException if error occurs while updating {@link GiftCertificate} object
+     */
     @PatchMapping("/{id}")
     public void update(@PathVariable long id, @Valid @NotNull @RequestBody GiftCertificate patch) {
         try {
@@ -68,6 +105,12 @@ public class GiftCertificateController {
         }
     }
 
+    /**
+     * Deletes {@link GiftCertificate} object with provided id.
+     *
+     * @param id object id to be deleted
+     * @throws ServerInternalErrorException if error occurs while deleting {@link GiftCertificate} object
+     */
     @DeleteMapping("/{id}")
     public void delete(@PathVariable long id) {
         try {
@@ -78,6 +121,14 @@ public class GiftCertificateController {
         }
     }
 
+    /**
+     * Finds {@link GiftCertificate} object by tag name.
+     *
+     * @param tagName    tag name to search by
+     * @param parameters the parameters
+     * @return list of found {@link GiftCertificate} objects
+     * @throws ServerInternalErrorException if error occurs while finding {@link GiftCertificate} object by tag name
+     */
     @GetMapping("/tag/{tagName}")
     public List<GiftCertificate> findByTagName(@PathVariable String tagName,
                                                @RequestParam(required = false) MultiValueMap<String, String> parameters) {
