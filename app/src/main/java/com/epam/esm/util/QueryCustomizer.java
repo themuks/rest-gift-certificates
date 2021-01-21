@@ -1,5 +1,7 @@
-package com.epam.esm.model.dao;
+package com.epam.esm.util;
 
+import com.epam.esm.util.entity.SearchUnit;
+import com.epam.esm.util.entity.SortUnit;
 import lombok.ToString;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MultiValueMap;

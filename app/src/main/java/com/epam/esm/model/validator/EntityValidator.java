@@ -1,4 +1,4 @@
-package com.epam.esm.model.service.validator;
+package com.epam.esm.model.validator;
 
 public class EntityValidator {
     private static final int ZERO = 0;

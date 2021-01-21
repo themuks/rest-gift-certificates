@@ -1,4 +1,4 @@
-package com.epam.esm.model.service.validator;
+package com.epam.esm.model.validator;
 
 import com.epam.esm.entity.GiftCertificate;
 import org.junit.jupiter.api.Test;
@@ -6,27 +6,39 @@ import org.springframework.validation.DataBinder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GiftCertificateValidatorTest {
-    private final GiftCertificateValidator giftCertificateValidator = new GiftCertificateValidator(new TagValidator());
+class ProxyGiftCertificateValidatorTest {
+    private final ProxyGiftCertificateValidator proxyGiftCertificateValidator = new ProxyGiftCertificateValidator(new TagValidator());
 
     @Test
     void supports_GiftCertificateClassGiven_ShouldReturnTrue() {
-        assertTrue(giftCertificateValidator.supports(GiftCertificate.class));
+        assertTrue(proxyGiftCertificateValidator.supports(GiftCertificate.class));
     }
 
     @Test
     void supports_ObjectClassGiven_ShouldReturnFalse() {
-        assertFalse(giftCertificateValidator.supports(Object.class));
+        assertFalse(proxyGiftCertificateValidator.supports(Object.class));
     }
 
     @Test
     void validate_ValidGiftCertificateGiven_ShouldNotMakeErrors() {
-        DataBinder dataBinder = new DataBinder(new GiftCertificate());
-        dataBinder.addValidators(giftCertificateValidator);
+        LocalDateTime localDateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .duration(1)
+                .price(new BigDecimal(10))
+                .createDate(localDateTime)
+                .lastUpdateDate(localDateTime.minusDays(1))
+                .tags(new ArrayList<>())
+                .build();
+        DataBinder dataBinder = new DataBinder(giftCertificate);
+        dataBinder.addValidators(proxyGiftCertificateValidator);
         dataBinder.validate();
         assertFalse(dataBinder.getBindingResult().hasErrors());
     }
@@ -45,7 +57,7 @@ class GiftCertificateValidatorTest {
                 .tags(null)
                 .build();
         DataBinder dataBinder = new DataBinder(giftCertificate);
-        dataBinder.addValidators(giftCertificateValidator);
+        dataBinder.addValidators(proxyGiftCertificateValidator);
         dataBinder.validate();
         assertTrue(dataBinder.getBindingResult().hasErrors());
     }

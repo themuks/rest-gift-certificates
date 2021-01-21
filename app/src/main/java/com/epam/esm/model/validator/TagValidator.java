@@ -1,4 +1,4 @@
-package com.epam.esm.model.service.validator;
+package com.epam.esm.model.validator;
 
 import com.epam.esm.entity.Tag;
 import org.springframework.stereotype.Service;

@@ -2,12 +2,12 @@ package com.epam.esm.model.service.impl;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
-import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
-import com.epam.esm.model.service.validator.EntityValidator;
-import com.epam.esm.model.service.validator.TagValidator;
+import com.epam.esm.model.validator.EntityValidator;
+import com.epam.esm.model.validator.TagValidator;
+import com.epam.esm.util.QueryCustomizer;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;

@@ -2,9 +2,9 @@ package com.epam.esm.model.service.impl;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
-import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.service.ServiceException;
+import com.epam.esm.util.QueryCustomizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

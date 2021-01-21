@@ -1,6 +1,7 @@
 package com.epam.esm.model.dao;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.util.QueryCustomizer;
 
 import java.util.List;
 

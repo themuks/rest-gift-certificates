@@ -1,5 +1,7 @@
 package com.epam.esm.model.dao;
 
+import com.epam.esm.util.QueryCustomizer;
+
 import java.util.List;
 import java.util.Optional;
 

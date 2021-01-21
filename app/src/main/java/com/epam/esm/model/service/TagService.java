@@ -1,7 +1,7 @@
 package com.epam.esm.model.service;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.model.dao.QueryCustomizer;
+import com.epam.esm.util.QueryCustomizer;
 
 import java.util.List;
 import java.util.Optional;
