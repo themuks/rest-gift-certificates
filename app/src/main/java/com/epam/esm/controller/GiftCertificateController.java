@@ -7,12 +7,12 @@ import com.epam.esm.model.dao.QueryCustomizer;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import org.apache.log4j.Logger;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.MultiValueMap;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @RestController
@@ -49,10 +49,7 @@ public class GiftCertificateController {
     }
 
     @PostMapping("/add")
-    public void add(@RequestBody GiftCertificate giftCertificate) {
-        if (giftCertificate == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gift certificate required and must be not null");
-        }
+    public void add(@Valid @NotNull @RequestBody GiftCertificate giftCertificate) {
         try {
             giftCertificateService.add(giftCertificate);
         } catch (ServiceException e) {
@@ -62,10 +59,7 @@ public class GiftCertificateController {
     }
 
     @PatchMapping("/{id}")
-    public void update(@PathVariable long id, @RequestBody GiftCertificate patch) {
-        if (patch == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Gift certificate required and must be not null");
-        }
+    public void update(@PathVariable long id, @Valid @NotNull @RequestBody GiftCertificate patch) {
         try {
             giftCertificateService.update(id, patch);
         } catch (ServiceException e) {
@@ -87,9 +81,6 @@ public class GiftCertificateController {
     @GetMapping("/tag/{tagName}")
     public List<GiftCertificate> findByTagName(@PathVariable String tagName,
                                                @RequestParam(required = false) MultiValueMap<String, String> parameters) {
-        if (tagName == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Tag name required and must be not null");
-        }
         QueryCustomizer queryCustomizer = new QueryCustomizer(parameters);
         try {
             return giftCertificateService.findByTagName(tagName, queryCustomizer);

@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.MultiValueMapAdapter;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -117,11 +116,6 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void add_NullGiven_ShouldThrowResponseStatusException() {
-        assertThrows(ResponseStatusException.class, () -> giftCertificateController.add(null));
-    }
-
-    @Test
     void add_ServiceExceptionThrown_ShouldThrowServerInternalErrorException() {
         try {
             when(giftCertificateService.add(any(GiftCertificate.class))).thenThrow(new ServiceException());
@@ -140,11 +134,6 @@ class GiftCertificateControllerTest {
             fail(e);
         }
         verify(giftCertificateService, times(1)).update(id, giftCertificate);
-    }
-
-    @Test
-    void update_InvalidIdAndNullGiven_ShouldThrowResponseStatusException() {
-        assertThrows(ResponseStatusException.class, () -> giftCertificateController.update(-1, null));
     }
 
     @Test
@@ -186,11 +175,6 @@ class GiftCertificateControllerTest {
         } catch (ServerInternalErrorException e) {
             fail(e);
         }
-    }
-
-    @Test
-    void findByTagName_NullsGiven_ShouldThrowResponseStatusException() {
-        assertThrows(ResponseStatusException.class, () -> giftCertificateController.findByTagName(null, null));
     }
 
     @Test

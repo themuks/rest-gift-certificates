@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.MultiValueMapAdapter;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.List;
@@ -114,11 +113,6 @@ class TagControllerTest {
             fail(e);
         }
         verify(tagService, times(1)).add(new Tag());
-    }
-
-    @Test
-    void add_NullGiven_ShouldThrowResponseStatusException() {
-        assertThrows(ResponseStatusException.class, () -> tagController.add(null));
     }
 
     @Test
