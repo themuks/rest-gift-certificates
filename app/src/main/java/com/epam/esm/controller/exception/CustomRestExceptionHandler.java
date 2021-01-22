@@ -23,6 +23,12 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         return buildResponseEntity(new ApiError(ex.getLocalizedMessage(), errorCode), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    protected ResponseEntity<Object> illegalArgumentException(IllegalArgumentException ex) {
+        String errorCode = Integer.toString(HttpStatus.BAD_REQUEST.value());
+        return buildResponseEntity(new ApiError(ex.getLocalizedMessage(), errorCode), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(ServerInternalErrorException.class)
     protected ResponseEntity<Object> serverInternalErrorException(ServerInternalErrorException ex) {
         String errorCode = HttpStatus.INTERNAL_SERVER_ERROR.value() + ex.getEntityCode();
@@ -47,7 +53,6 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
                 Integer.toString(HttpStatus.BAD_REQUEST.value()));
         return buildResponseEntity(apiError, HttpStatus.BAD_REQUEST);
     }
-
 
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {

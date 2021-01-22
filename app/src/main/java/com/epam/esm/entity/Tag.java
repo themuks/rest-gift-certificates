@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.util.List;
@@ -18,5 +19,6 @@ public class Tag {
     private Long id;
     @Size(min = 1, max = 255)
     private String name;
+    @Valid
     private List<GiftCertificate> giftCertificates;
 }

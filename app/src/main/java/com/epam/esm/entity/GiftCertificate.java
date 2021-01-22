@@ -10,6 +10,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.PastOrPresent;
 import javax.validation.constraints.Positive;
@@ -43,5 +44,6 @@ public class GiftCertificate {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @PastOrPresent
     private LocalDateTime lastUpdateDate;
+    @Valid
     private List<Tag> tags;
 }

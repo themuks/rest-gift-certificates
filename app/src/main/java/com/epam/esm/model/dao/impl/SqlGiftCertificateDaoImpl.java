@@ -69,8 +69,12 @@ public class SqlGiftCertificateDaoImpl implements GiftCertificateDao {
             ps.setString(2, giftCertificate.getDescription());
             ps.setBigDecimal(3, giftCertificate.getPrice());
             ps.setInt(4, giftCertificate.getDuration());
-            ps.setTimestamp(5, Timestamp.valueOf(giftCertificate.getCreateDate()));
-            ps.setTimestamp(6, Timestamp.valueOf(giftCertificate.getLastUpdateDate()));
+            ps.setTimestamp(5, giftCertificate.getCreateDate() != null
+                    ? Timestamp.valueOf(giftCertificate.getCreateDate())
+                    : null);
+            ps.setTimestamp(6, giftCertificate.getLastUpdateDate() != null
+                    ? Timestamp.valueOf(giftCertificate.getLastUpdateDate())
+                    : null);
             return ps;
         }, keyHolder);
         long generatedGiftCertificateId = keyHolder.getKey().longValue();

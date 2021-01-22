@@ -87,14 +87,9 @@ public class GiftCertificateValidator implements Validator {
         List<Tag> tags = giftCertificate.getTags();
         if (tags != null) {
             try {
-                errors.pushNestedPath("tags");
-                for (Tag tag : tags) {
-                    try {
-                        errors.pushNestedPath("tag");
-                        ValidationUtils.invokeValidator(tagValidator, tag, errors);
-                    } finally {
-                        errors.popNestedPath();
-                    }
+                for (int i = 0; i < tags.size(); i++) {
+                    errors.pushNestedPath(String.format("%s[%d]", "tags", i));
+                    ValidationUtils.invokeValidator(tagValidator, tags.get(i), errors);
                 }
             } finally {
                 errors.popNestedPath();

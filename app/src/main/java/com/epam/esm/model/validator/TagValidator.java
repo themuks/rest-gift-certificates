@@ -23,8 +23,8 @@ public class TagValidator implements Validator {
             }
         }
         String name = tag.getName();
-        ValidationUtils.rejectIfEmpty(errors, "name", "name.empty");
         if (name != null) {
+            ValidationUtils.rejectIfEmpty(errors, "name", "name.empty");
             if (name.length() > 255) {
                 errors.rejectValue("name", "name.too_long");
             }

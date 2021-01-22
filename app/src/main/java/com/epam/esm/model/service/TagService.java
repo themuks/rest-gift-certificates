@@ -21,7 +21,7 @@ public interface TagService {
      * @return generated id of added tag
      * @throws ServiceException         if error occurs while adding {@link Tag} to repository
      * @throws IllegalArgumentException if provided object is null or doesn't pass validation
-     *                                  (see {@link com.epam.esm.model.validator.ProxyGiftCertificateValidator})
+     *                                  (see {@link com.epam.esm.model.validator.TagValidator})
      */
     long add(Tag tag) throws ServiceException;
 

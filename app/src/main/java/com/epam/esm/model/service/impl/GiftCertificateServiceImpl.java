@@ -7,7 +7,6 @@ import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.validator.EntityValidator;
 import com.epam.esm.model.validator.GiftCertificateValidator;
-import com.epam.esm.model.validator.ProxyGiftCertificateValidator;
 import com.epam.esm.model.validator.TagValidator;
 import com.epam.esm.util.QueryCustomizer;
 import org.springframework.stereotype.Service;
@@ -34,8 +33,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                     "required and must not be null");
         }
         DataBinder dataBinder = new DataBinder(giftCertificate);
-        ProxyGiftCertificateValidator proxyValidator = new ProxyGiftCertificateValidator(new TagValidator());
-        dataBinder.addValidators(proxyValidator);
+        dataBinder.addValidators(giftCertificateValidator);
         dataBinder.validate();
         BindingResult bindingResult = dataBinder.getBindingResult();
         if (bindingResult.hasErrors()) {

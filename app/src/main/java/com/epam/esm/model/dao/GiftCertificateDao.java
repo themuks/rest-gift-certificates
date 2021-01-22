@@ -19,7 +19,7 @@ public interface GiftCertificateDao extends BaseDao<GiftCertificate> {
      * @param id tag id to search by
      * @return list of found {@code GiftCertificate} objects
      * @throws DaoException if error occurs while finding {@code GiftCertificate} objects
-     * by tag id
+     *                      by tag id
      */
     List<GiftCertificate> findByTagId(long id) throws DaoException;
 
@@ -29,7 +29,7 @@ public interface GiftCertificateDao extends BaseDao<GiftCertificate> {
      * @param tagName tag name to search by
      * @return list of found {@code GiftCertificate} objects
      * @throws DaoException if error occurs while finding {@code GiftCertificate} objects
-     * by tag name
+     *                      by tag name
      */
     List<GiftCertificate> findByTagName(String tagName) throws DaoException;
 
@@ -41,7 +41,7 @@ public interface GiftCertificateDao extends BaseDao<GiftCertificate> {
      * @param queryCustomizer query customizer which affects result list
      * @return list of found {@code GiftCertificate} objects
      * @throws DaoException if error occurs while finding {@code GiftCertificate} objects
-     * by tag name
+     *                      by tag name
      */
     List<GiftCertificate> findByTagName(String tagName, QueryCustomizer queryCustomizer) throws DaoException;
 }
