@@ -35,10 +35,10 @@ class TagServiceImplTest {
         Tag tag = Tag.builder()
                 .name("name")
                 .build();
-        when(tagDao.add(any(Tag.class))).thenReturn(1L);
+        when(tagDao.add(any(Tag.class))).thenReturn(new Tag());
         try {
-            long actual = tagService.add(tag);
-            long expected = 1L;
+            Tag actual = tagService.add(tag);
+            Tag expected = new Tag();
             assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
@@ -48,11 +48,6 @@ class TagServiceImplTest {
     @Test
     void add_NullGiven_ShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> tagService.add(null));
-    }
-
-    @Test
-    void add_InvalidTagGiven_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> tagService.add(new Tag()));
     }
 
     @Test

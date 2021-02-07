@@ -1,13 +1,11 @@
 package com.epam.esm.model.dao.impl;
 
-import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
-import com.epam.esm.model.dao.GiftCertificateDao;
 import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.util.QueryCustomizer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -27,8 +25,6 @@ import java.util.Optional;
 @Transactional
 public class SqlTagDaoImpl implements TagDao {
     private static final String INSERT_QUERY = "INSERT INTO tag (name) VALUES (?)";
-    private static final String INSERT_INTO_REF_TABLE_QUERY =
-            "INSERT INTO gift_certificate_has_tag (gift_certificate_id, tag_id) VALUES (?, ?)";
     private static final String FIND_BY_ID_QUERY = "SELECT id, name FROM tag WHERE id = ?";
     private static final String FIND_ALL_QUERY = "SELECT id, name FROM tag";
     private static final String FIND_BY_GIFT_CERTIFICATE_ID_QUERY =
@@ -36,54 +32,32 @@ public class SqlTagDaoImpl implements TagDao {
                     "(SELECT tag_id FROM gift_certificate_has_tag WHERE gift_certificate_id = ?)";
     private static final String DELETE_QUERY = "DELETE FROM tag WHERE id = ?";
     private final JdbcTemplate jdbcTemplate;
-    private GiftCertificateDao giftCertificateDao;
 
     public SqlTagDaoImpl(DataSource dataSource) {
         jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    @Autowired
-    public void setGiftCertificateDao(GiftCertificateDao giftCertificateDao) {
-        this.giftCertificateDao = giftCertificateDao;
-    }
-
     @Override
-    public long add(Tag tag) throws DaoException {
+    public Tag add(Tag tag) throws DaoException {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(INSERT_QUERY, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, tag.getName());
             return ps;
         }, keyHolder);
-        long generatedTagId = keyHolder.getKey().longValue();
-        if (tag.getGiftCertificates() != null) {
-            for (GiftCertificate giftCertificate : tag.getGiftCertificates()) {
-                try {
-                    if (giftCertificate.getId() == null) {
-                        long generatedGiftCertificateId = giftCertificateDao.add(giftCertificate);
-                        giftCertificate.setId(generatedGiftCertificateId);
-                    } else {
-                        if (giftCertificateDao.findById(giftCertificate.getId()).isEmpty()) {
-                            long generatedGiftCertificateId = giftCertificateDao.add(giftCertificate);
-                            giftCertificate.setId(generatedGiftCertificateId);
-                        }
-                    }
-                    jdbcTemplate.update(INSERT_INTO_REF_TABLE_QUERY, giftCertificate.getId(), generatedTagId);
-                } catch (DaoException e) {
-                    throw new DaoException("Error while adding gift certificate", e);
-                }
-            }
+        if (keyHolder.getKey() == null) {
+            throw new DaoException("Generated tag id is null");
         }
-        return generatedTagId;
+        long generatedTagId = keyHolder.getKey().longValue();
+        return findById(generatedTagId)
+                .orElseThrow(() -> new DaoException("Error while adding tag"));
     }
 
     @Override
     public Optional<Tag> findById(long id) throws DaoException {
         try {
-            List<GiftCertificate> giftCertificates = giftCertificateDao.findByTagId(id);
             Tag tag = jdbcTemplate.queryForObject(FIND_BY_ID_QUERY, new TagRowMapper(), id);
-            tag.setGiftCertificates(giftCertificates);
-            return Optional.of(tag);
+            return Optional.ofNullable(tag);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -96,22 +70,24 @@ public class SqlTagDaoImpl implements TagDao {
 
     @Override
     public List<Tag> findAll(QueryCustomizer queryCustomizer) throws DaoException {
-        List<Tag> tags = jdbcTemplate.query(queryCustomizer.prepareQuery(FIND_ALL_QUERY), new TagRowMapper());
-        for (Tag tag : tags) {
-            List<GiftCertificate> giftCertificates = giftCertificateDao.findByTagId(tag.getId());
-            tag.setGiftCertificates(giftCertificates);
+        try {
+            return jdbcTemplate.query(queryCustomizer.prepareQuery(FIND_ALL_QUERY), new TagRowMapper());
+        } catch (BadSqlGrammarException e) {
+            throw new DaoException("Invalid query", e);
         }
-        return tags;
     }
 
     @Override
-    public void update(long id, Tag tag) {
+    public Tag update(long id, Tag tag) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void delete(long id) throws DaoException {
+    public Tag delete(long id) throws DaoException {
+        Tag tag = findById(id).orElseThrow(
+                () -> new DaoException("Error while deleting tag. Object with such id is not exist"));
         jdbcTemplate.update(DELETE_QUERY, id);
+        return tag;
     }
 
     @Override

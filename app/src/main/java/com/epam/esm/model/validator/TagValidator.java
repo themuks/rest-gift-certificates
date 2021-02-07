@@ -6,6 +6,11 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
+/**
+ * TagValidator is a Validator for {@link Tag} objects.
+ * Validator checks id value and name value to be correct and not null.
+ * Result of validation will be stored in {@link Errors} object.
+ */
 @Service
 public class TagValidator implements Validator {
     @Override
@@ -23,8 +28,8 @@ public class TagValidator implements Validator {
             }
         }
         String name = tag.getName();
+        ValidationUtils.rejectIfEmpty(errors, "name", "name.empty");
         if (name != null) {
-            ValidationUtils.rejectIfEmpty(errors, "name", "name.empty");
             if (name.length() > 255) {
                 errors.rejectValue("name", "name.too_long");
             }

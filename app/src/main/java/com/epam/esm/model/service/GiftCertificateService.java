@@ -18,12 +18,12 @@ public interface GiftCertificateService {
      * Adds {@link GiftCertificate} object to repository.
      *
      * @param giftCertificate gift certificate to be added
-     * @return generated id of added gift certificate
+     * @return added gift certificate
      * @throws ServiceException         if error occurs while adding {@link GiftCertificate} to repository
      * @throws IllegalArgumentException if provided object is null or doesn't pass validation
      *                                  (see {@link com.epam.esm.model.validator.GiftCertificateValidator})
      */
-    long add(GiftCertificate giftCertificate) throws ServiceException;
+    GiftCertificate add(GiftCertificate giftCertificate) throws ServiceException;
 
     /**
      * Finds {@link GiftCertificate} by id and returns optional.
@@ -61,22 +61,24 @@ public interface GiftCertificateService {
      *
      * @param id              id of object to be updated
      * @param giftCertificate gift certificate object with new field values
+     * @return updated {@link GiftCertificate}
      * @throws ServiceException         if error occurs while updating {@link GiftCertificate} to repository
      * @throws IllegalArgumentException if provided object is null or parameters doesn't pass validation
      *                                  (see {@link com.epam.esm.model.validator.GiftCertificateValidator}
      *                                  and {@link com.epam.esm.model.validator.EntityValidator})
      */
-    void update(long id, GiftCertificate giftCertificate) throws ServiceException;
+    GiftCertificate update(long id, GiftCertificate giftCertificate) throws ServiceException;
 
     /**
      * Deletes {@link GiftCertificate} object with provided id from repository.
      *
      * @param id id of object to be deleted
+     * @return deleted {@link GiftCertificate}
      * @throws ServiceException         if error occurs while deleting {@link GiftCertificate} from repository
      * @throws IllegalArgumentException if provided id doesn't pass validation
      *                                  (see {@link com.epam.esm.model.validator.EntityValidator})
      */
-    void delete(long id) throws ServiceException;
+    GiftCertificate delete(long id) throws ServiceException;
 
     /**
      * Finds {@link GiftCertificate} objects by tag name and returns list.

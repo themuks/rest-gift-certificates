@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * Thrown to indicate that request to controller has errors
+ * Contains response information for user when exception is thrown
  */
 @Data
 @AllArgsConstructor

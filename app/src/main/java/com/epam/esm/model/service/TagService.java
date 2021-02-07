@@ -18,12 +18,12 @@ public interface TagService {
      * Adds {@link Tag} object to repository.
      *
      * @param tag tag to be added
-     * @return generated id of added tag
+     * @return added {@link Tag}
      * @throws ServiceException         if error occurs while adding {@link Tag} to repository
      * @throws IllegalArgumentException if provided object is null or doesn't pass validation
      *                                  (see {@link com.epam.esm.model.validator.TagValidator})
      */
-    long add(Tag tag) throws ServiceException;
+    Tag add(Tag tag) throws ServiceException;
 
     /**
      * Finds {@link Tag} by id and returns optional.
@@ -59,9 +59,10 @@ public interface TagService {
      * Deletes {@link Tag} object with provided id from repository.
      *
      * @param id id of object to be deleted
+     * @return deleted {@link Tag}
      * @throws ServiceException         if error occurs while deleting {@link Tag} from repository
      * @throws IllegalArgumentException if provided id doesn't pass validation
      *                                  (see {@link com.epam.esm.model.validator.EntityValidator})
      */
-    void delete(long id) throws ServiceException;
+    Tag delete(long id) throws ServiceException;
 }

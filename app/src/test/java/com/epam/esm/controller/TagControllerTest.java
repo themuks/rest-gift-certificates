@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.MultiValueMapAdapter;
+import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ class TagControllerTest {
     void findAll_NullParametersGiven_ShouldReturnList() throws ServiceException {
         when(tagService.findAll(any(QueryCustomizer.class))).thenReturn(List.of(new Tag()));
         try {
-            List<Tag> actual = tagController.findAll(null);
+            List<Tag> actual = tagController.findAll(null, null, null, null);
             List<Tag> expected = List.of(new Tag());
             assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
@@ -51,7 +51,7 @@ class TagControllerTest {
             when(tagService.findAll(any(QueryCustomizer.class))).thenThrow(new ServiceException());
         } catch (ServiceException ignored) {
         }
-        assertThrows(ServerInternalErrorException.class, () -> tagController.findAll(null));
+        assertThrows(ServerInternalErrorException.class, () -> tagController.findAll(null, null, null, null));
     }
 
     @Test
@@ -59,7 +59,7 @@ class TagControllerTest {
         when(tagService.findAll(any(QueryCustomizer.class))).thenReturn(List.of(new Tag()));
         try {
             List<Tag> actual = tagController
-                    .findAll(new MultiValueMapAdapter<>(new HashMap<>()));
+                    .findAll(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
             List<Tag> expected = List.of(new Tag());
             assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
@@ -74,7 +74,7 @@ class TagControllerTest {
         } catch (ServiceException ignored) {
         }
         assertThrows(ServerInternalErrorException.class,
-                () -> tagController.findAll(new MultiValueMapAdapter<>(new HashMap<>())));
+                () -> tagController.findAll(new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
     }
 
     @Test
@@ -106,13 +106,15 @@ class TagControllerTest {
 
     @Test
     void add_TagGiven_Success() throws ServiceException {
-        when(tagService.add(any(Tag.class))).thenReturn(1L);
+        when(tagService.add(any(Tag.class))).thenReturn(new Tag());
         try {
-            tagController.add(new Tag());
+            ResponseEntity<Tag> responseEntity = tagController.add(new Tag());
+            Tag actual = responseEntity.getBody();
+            Tag expected = new Tag();
+            assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
             fail(e);
         }
-        verify(tagService, times(1)).add(new Tag());
     }
 
     @Test

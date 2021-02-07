@@ -13,5 +13,6 @@ public class ServerInternalErrorException extends RuntimeException {
 
     public ServerInternalErrorException(String message, String entityCode) {
         super(message);
+        this.entityCode = entityCode;
     }
 }

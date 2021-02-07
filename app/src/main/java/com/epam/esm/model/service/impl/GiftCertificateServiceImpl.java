@@ -7,6 +7,7 @@ import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.validator.EntityValidator;
 import com.epam.esm.model.validator.GiftCertificateValidator;
+import com.epam.esm.model.validator.ProxyGiftCertificateValidator;
 import com.epam.esm.model.validator.TagValidator;
 import com.epam.esm.util.QueryCustomizer;
 import org.springframework.stereotype.Service;
@@ -21,28 +22,30 @@ import java.util.Optional;
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
     private final Validator giftCertificateValidator = new GiftCertificateValidator(new TagValidator());
+    private final Validator proxyGiftCertificateValidator = new ProxyGiftCertificateValidator(new TagValidator());
 
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao) {
         this.giftCertificateDao = giftCertificateDao;
     }
 
     @Override
-    public long add(GiftCertificate giftCertificate) throws ServiceException {
+    public GiftCertificate add(GiftCertificate giftCertificate) throws ServiceException {
         if (giftCertificate == null) {
             throw new IllegalArgumentException("The supplied [GiftCertificate] is " +
                     "required and must not be null");
         }
         DataBinder dataBinder = new DataBinder(giftCertificate);
-        dataBinder.addValidators(giftCertificateValidator);
+        dataBinder.addValidators(proxyGiftCertificateValidator);
         dataBinder.validate();
         BindingResult bindingResult = dataBinder.getBindingResult();
         if (bindingResult.hasErrors()) {
-            throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid fields");
+            throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid field '"
+                    + bindingResult.getFieldError().getField() + "'");
         }
         try {
             return giftCertificateDao.add(giftCertificate);
         } catch (DaoException e) {
-            throw new ServiceException("Error while adding gift certificate", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -54,7 +57,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             return giftCertificateDao.findById(id);
         } catch (DaoException e) {
-            throw new ServiceException("Error while finding gift certificate by id", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -63,7 +66,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             return giftCertificateDao.findAll();
         } catch (DaoException e) {
-            throw new ServiceException("Error while finding all gift certificates", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -76,12 +79,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             return giftCertificateDao.findAll(queryCustomizer);
         } catch (DaoException e) {
-            throw new ServiceException("Error while finding all gift certificates", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
     @Override
-    public void update(long id, GiftCertificate giftCertificate) throws ServiceException {
+    public GiftCertificate update(long id, GiftCertificate giftCertificate) throws ServiceException {
         if (!EntityValidator.isIdValid(id)) {
             throw new IllegalArgumentException("Id must be positive");
         }
@@ -94,24 +97,25 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         dataBinder.validate();
         BindingResult bindingResult = dataBinder.getBindingResult();
         if (bindingResult.hasErrors()) {
-            throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid fields");
+            throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid field '"
+                    + bindingResult.getFieldError().getField() + "'");
         }
         try {
-            giftCertificateDao.update(id, giftCertificate);
+            return giftCertificateDao.update(id, giftCertificate);
         } catch (DaoException e) {
-            throw new ServiceException("Error while updating gift certificate", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
     @Override
-    public void delete(long id) throws ServiceException {
+    public GiftCertificate delete(long id) throws ServiceException {
         if (!EntityValidator.isIdValid(id)) {
             throw new IllegalArgumentException("Id must be positive");
         }
         try {
-            giftCertificateDao.delete(id);
+            return giftCertificateDao.delete(id);
         } catch (DaoException e) {
-            throw new ServiceException("Error while deleting gift certificate", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -124,7 +128,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             return giftCertificateDao.findByTagName(tagName);
         } catch (DaoException e) {
-            throw new ServiceException("Error while finding gift certificate by tag name", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 
@@ -141,7 +145,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         try {
             return giftCertificateDao.findByTagName(tagName, queryCustomizer);
         } catch (DaoException e) {
-            throw new ServiceException("Error while finding gift certificate by tag name", e);
+            throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
 }

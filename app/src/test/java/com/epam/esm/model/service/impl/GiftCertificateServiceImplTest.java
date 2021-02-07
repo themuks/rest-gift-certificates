@@ -43,10 +43,10 @@ class GiftCertificateServiceImplTest {
                 .lastUpdateDate(dateTime.minusDays(1))
                 .tags(new ArrayList<>())
                 .build();
-        when(giftCertificateDao.add(any(GiftCertificate.class))).thenReturn(1L);
+        when(giftCertificateDao.add(any(GiftCertificate.class))).thenReturn(new GiftCertificate());
         try {
-            long actual = giftCertificateService.add(giftCertificate);
-            long expected = 1L;
+            GiftCertificate actual = giftCertificateService.add(giftCertificate);
+            GiftCertificate expected = new GiftCertificate();
             assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
@@ -56,11 +56,6 @@ class GiftCertificateServiceImplTest {
     @Test
     void add_NullGiven_ShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class, () -> giftCertificateService.add(null));
-    }
-
-    @Test
-    void add_InvalidGiftCertificateGiven_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.add(new GiftCertificate()));
     }
 
     @Test

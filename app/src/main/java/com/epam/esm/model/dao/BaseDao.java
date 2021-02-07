@@ -15,10 +15,10 @@ public interface BaseDao<T> {
      * Adds provided object to the data source.
      *
      * @param t generic type object
-     * @return generated id of the added object
+     * @return added object
      * @throws DaoException if error occurs while adding object to the data source
      */
-    long add(T t) throws DaoException;
+    T add(T t) throws DaoException;
 
     /**
      * Finds object in the data source by provided id.
@@ -54,15 +54,17 @@ public interface BaseDao<T> {
      *
      * @param id id of entity in the data source
      * @param t  object with values to be updated
+     * @return added object
      * @throws DaoException if error occurs while updating object in the data source
      */
-    void update(long id, T t) throws DaoException;
+    T update(long id, T t) throws DaoException;
 
     /**
      * Deletes from data source the object with provided id.
      *
      * @param id id of entity in the data source that would be deleted
+     * @return deleted object
      * @throws DaoException if error occurs while deleting object by id from the data source
      */
-    void delete(long id) throws DaoException;
+    T delete(long id) throws DaoException;
 }

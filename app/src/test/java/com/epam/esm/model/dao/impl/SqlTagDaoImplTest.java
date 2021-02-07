@@ -4,7 +4,6 @@ import com.epam.esm.config.SpringTestConfig;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.DaoException;
-import com.epam.esm.model.dao.GiftCertificateDao;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,15 +31,15 @@ class SqlTagDaoImplTest {
     @Autowired
     private DataSource dataSource;
     private SqlTagDaoImpl tagDao;
+    private SqlGiftCertificateDaoImpl giftCertificateDao;
     private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private GiftCertificateDao giftCertificateDao;
 
     @BeforeEach
     void setUp() {
         jdbcTemplate = new JdbcTemplate(dataSource);
         tagDao = new SqlTagDaoImpl(dataSource);
-        tagDao.setGiftCertificateDao(giftCertificateDao);
+        giftCertificateDao = new SqlGiftCertificateDaoImpl(dataSource);
+        giftCertificateDao.setTagDao(tagDao);
     }
 
     @AfterEach
@@ -79,13 +77,12 @@ class SqlTagDaoImplTest {
     @Test
     void findById_OneElementAndIdIsOne_OptionalWithObject() {
         Tag tag = Tag.builder()
+                .id(1L)
                 .name("name")
-                .giftCertificates(new ArrayList<>())
                 .build();
         try {
-            long generatedId = tagDao.add(tag);
-            tag.setId(generatedId);
-            Optional<Tag> actual = tagDao.findById(generatedId);
+            Tag addedTag = tagDao.add(tag);
+            Optional<Tag> actual = tagDao.findById(addedTag.getId());
             Optional<Tag> expected = Optional.of(tag);
             assertEquals(expected, actual);
         } catch (DaoException e) {
@@ -116,10 +113,9 @@ class SqlTagDaoImplTest {
                 .name("name")
                 .build();
         try {
-            long generatedId = tagDao.add(tag);
+            Tag addedTag = tagDao.add(tag);
             int expected = tagDao.findAll().size();
-            tag.setId(generatedId);
-            tagDao.delete(generatedId);
+            tagDao.delete(addedTag.getId());
             int actual = tagDao.findAll().size();
             assertEquals(expected - 1, actual);
         } catch (DaoException e) {
@@ -139,6 +135,10 @@ class SqlTagDaoImplTest {
                 .duration(1)
                 .price(new BigDecimal(123))
                 .build();
+        Tag tag = Tag.builder()
+                .id(1L)
+                .name("name")
+                .build();
         GiftCertificate giftCertificate2 = GiftCertificate.builder()
                 .id(2L)
                 .name("name")
@@ -147,17 +147,12 @@ class SqlTagDaoImplTest {
                 .lastUpdateDate(localDateTime.plusDays(1))
                 .duration(1)
                 .price(new BigDecimal(123))
-                .build();
-        Tag tag = Tag.builder()
-                .id(1L)
-                .name("name")
-                .giftCertificates(List.of(giftCertificate1, giftCertificate2))
+                .tags(List.of(tag))
                 .build();
         try {
-            long generatedId = tagDao.add(tag);
-            tag.setId(generatedId);
+            giftCertificateDao.add(giftCertificate1);
+            giftCertificateDao.add(giftCertificate2);
             List<Tag> tags = tagDao.findByGiftCertificateId(2);
-            tag.setGiftCertificates(null);
             boolean actual = tags.contains(tag);
             assertTrue(actual);
         } catch (DaoException e) {

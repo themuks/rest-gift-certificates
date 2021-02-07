@@ -11,9 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.MultiValueMapAdapter;
+import org.springframework.http.ResponseEntity;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,7 +37,7 @@ class GiftCertificateControllerTest {
     void findAll_NullParametersGiven_ShouldReturnList() throws ServiceException {
         when(giftCertificateService.findAll(any(QueryCustomizer.class))).thenReturn(List.of(new GiftCertificate()));
         try {
-            List<GiftCertificate> actual = giftCertificateController.findAll(null);
+            List<GiftCertificate> actual = giftCertificateController.findAll(null, null, null, null, null);
             List<GiftCertificate> expected = List.of(new GiftCertificate());
             assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
@@ -51,7 +51,7 @@ class GiftCertificateControllerTest {
             when(giftCertificateService.findAll(any(QueryCustomizer.class))).thenThrow(new ServiceException());
         } catch (ServiceException ignored) {
         }
-        assertThrows(ServerInternalErrorException.class, () -> giftCertificateController.findAll(null));
+        assertThrows(ServerInternalErrorException.class, () -> giftCertificateController.findAll(null, null, null, null, null));
     }
 
     @Test
@@ -59,7 +59,7 @@ class GiftCertificateControllerTest {
         when(giftCertificateService.findAll(any(QueryCustomizer.class))).thenReturn(List.of(new GiftCertificate()));
         try {
             List<GiftCertificate> actual = giftCertificateController
-                    .findAll(new MultiValueMapAdapter<>(new HashMap<>()));
+                    .findAll(null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
             List<GiftCertificate> expected = List.of(new GiftCertificate());
             assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
@@ -74,7 +74,7 @@ class GiftCertificateControllerTest {
         } catch (ServiceException ignored) {
         }
         assertThrows(ServerInternalErrorException.class,
-                () -> giftCertificateController.findAll(new MultiValueMapAdapter<>(new HashMap<>())));
+                () -> giftCertificateController.findAll(null, new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
     }
 
     @Test
@@ -106,13 +106,15 @@ class GiftCertificateControllerTest {
 
     @Test
     void add_GiftCertificateGiven_Success() throws ServiceException {
-        when(giftCertificateService.add(any(GiftCertificate.class))).thenReturn(1L);
+        when(giftCertificateService.add(any(GiftCertificate.class))).thenReturn(new GiftCertificate());
         try {
-            giftCertificateController.add(new GiftCertificate());
+            ResponseEntity<GiftCertificate> responseEntity = giftCertificateController.add(new GiftCertificate());
+            GiftCertificate actual = responseEntity.getBody();
+            GiftCertificate expected = new GiftCertificate();
+            assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
             fail(e);
         }
-        verify(giftCertificateService, times(1)).add(new GiftCertificate());
     }
 
     @Test
@@ -166,10 +168,10 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void findByTagName_TagNameGiven_ShouldReturnList() throws ServiceException {
+    void findAll_TagNameGiven_ShouldReturnList() throws ServiceException {
         when(giftCertificateService.findByTagName(anyString(), any(QueryCustomizer.class))).thenReturn(List.of(new GiftCertificate()));
         try {
-            List<GiftCertificate> actual = giftCertificateController.findByTagName("name", null);
+            List<GiftCertificate> actual = giftCertificateController.findAll("name", null, null, null, null);
             List<GiftCertificate> expected = List.of(new GiftCertificate());
             assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
@@ -178,22 +180,22 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void findByTagName_ServiceExceptionThrown_ShouldThrowServerInternalErrorException() {
+    void findAll_TagNameGivenServiceExceptionThrown_ShouldThrowServerInternalErrorException() {
         try {
             when(giftCertificateService.findByTagName(anyString(), any(QueryCustomizer.class))).thenThrow(new ServiceException());
         } catch (ServiceException ignored) {
         }
         assertThrows(ServerInternalErrorException.class,
-                () -> giftCertificateController.findByTagName("name", null));
+                () -> giftCertificateController.findAll("name", null, null, null, null));
     }
 
     @Test
-    void findByTagName_TagNameAndMultiValueMapGiven_ShouldReturnList() throws ServiceException {
+    void findAll_TagNameAndSortAndSearchParametersGiven_ShouldReturnList() throws ServiceException {
         when(giftCertificateService.findByTagName(anyString(), any(QueryCustomizer.class)))
                 .thenReturn(List.of(new GiftCertificate()));
         try {
             List<GiftCertificate> actual = giftCertificateController
-                    .findByTagName("name", new MultiValueMapAdapter<>(new HashMap<>()));
+                    .findAll("name", new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
             List<GiftCertificate> expected = List.of(new GiftCertificate());
             assertEquals(expected, actual);
         } catch (ServerInternalErrorException e) {
@@ -202,13 +204,13 @@ class GiftCertificateControllerTest {
     }
 
     @Test
-    void findByTagName_QueryCustomizerGivenServiceExceptionThrown_ShouldThrowServerInternalErrorException() {
+    void findAll_QueryCustomizerGivenServiceExceptionThrown_ShouldThrowServerInternalErrorException() {
         try {
             when(giftCertificateService.findByTagName(anyString(), any(QueryCustomizer.class)))
                     .thenThrow(new ServiceException());
         } catch (ServiceException ignored) {
         }
         assertThrows(ServerInternalErrorException.class, () -> giftCertificateController
-                .findByTagName("name", new MultiValueMapAdapter<>(new HashMap<>())));
+                .findAll("name", new ArrayList<>(), new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
     }
 }

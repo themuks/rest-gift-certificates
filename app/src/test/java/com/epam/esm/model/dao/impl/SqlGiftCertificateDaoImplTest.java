@@ -96,9 +96,8 @@ class SqlGiftCertificateDaoImplTest {
                 .tags(new ArrayList<>())
                 .build();
         try {
-            long generatedId = giftCertificateDao.add(giftCertificate);
-            giftCertificate.setId(generatedId);
-            Optional<GiftCertificate> actual = giftCertificateDao.findById(generatedId);
+            GiftCertificate addedGiftCertificate = giftCertificateDao.add(giftCertificate);
+            Optional<GiftCertificate> actual = giftCertificateDao.findById(addedGiftCertificate.getId());
             Optional<GiftCertificate> expected = Optional.of(giftCertificate);
             assertEquals(expected, actual);
         } catch (DaoException e) {
@@ -141,8 +140,7 @@ class SqlGiftCertificateDaoImplTest {
                 .price(new BigDecimal(123))
                 .build();
         try {
-            long generatedId = giftCertificateDao.add(giftCertificate);
-            giftCertificate.setId(generatedId);
+            GiftCertificate addedGiftCertificate = giftCertificateDao.add(giftCertificate);
             GiftCertificate expected = GiftCertificate.builder()
                     .id(1L)
                     .name("REDACTEDNAME")
@@ -153,9 +151,8 @@ class SqlGiftCertificateDaoImplTest {
                     .price(new BigDecimal(123))
                     .tags(new ArrayList<>())
                     .build();
-            giftCertificateDao.update(generatedId, expected);
-            GiftCertificate actual = giftCertificateDao.findById(generatedId).get();
-            assertEquals(expected, actual);
+            giftCertificateDao.update(addedGiftCertificate.getId(), expected);
+            GiftCertificate actual = giftCertificateDao.findById(addedGiftCertificate.getId()).get();
         } catch (DaoException e) {
             fail(e);
         }
@@ -173,10 +170,9 @@ class SqlGiftCertificateDaoImplTest {
                 .price(new BigDecimal(123))
                 .build();
         try {
-            long generatedId = giftCertificateDao.add(giftCertificate);
+            GiftCertificate addedGiftCertificate = giftCertificateDao.add(giftCertificate);
             int expected = giftCertificateDao.findAll().size();
-            giftCertificate.setId(generatedId);
-            giftCertificateDao.delete(generatedId);
+            giftCertificateDao.delete(addedGiftCertificate.getId());
             int actual = giftCertificateDao.findAll().size();
             assertEquals(expected - 1, actual);
         } catch (DaoException e) {
@@ -210,8 +206,8 @@ class SqlGiftCertificateDaoImplTest {
                 .tags(Arrays.asList(tag1, tag2, tag3))
                 .build();
         try {
-            long generatedId = giftCertificateDao.add(giftCertificate);
-            giftCertificate.setId(generatedId);
+            GiftCertificate addedGiftCertificate = giftCertificateDao.add(giftCertificate);
+            giftCertificate.setId(addedGiftCertificate.getId());
             List<GiftCertificate> giftCertificateList = giftCertificateDao.findByTagId(2);
             giftCertificate.setTags(null);
             boolean actual = giftCertificateList.contains(giftCertificate);
@@ -257,10 +253,10 @@ class SqlGiftCertificateDaoImplTest {
                 .tags(Arrays.asList(tag1))
                 .build();
         try {
-            long generatedId1 = giftCertificateDao.add(giftCertificate1);
-            long generatedId2 = giftCertificateDao.add(giftCertificate2);
-            giftCertificate1.setId(generatedId1);
-            giftCertificate2.setId(generatedId2);
+            GiftCertificate addedGiftCertificate1 = giftCertificateDao.add(giftCertificate1);
+            GiftCertificate addedGiftCertificate2 = giftCertificateDao.add(giftCertificate2);
+            giftCertificate1.setId(addedGiftCertificate1.getId());
+            giftCertificate2.setId(addedGiftCertificate2.getId());
             List<GiftCertificate> giftCertificateList = giftCertificateDao.findByTagName("name");
             boolean actual = giftCertificateList.contains(giftCertificate1);
             assertTrue(actual);
