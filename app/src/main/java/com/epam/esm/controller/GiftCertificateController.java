@@ -5,7 +5,6 @@ import com.epam.esm.controller.exception.ServerInternalErrorException;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
-import com.epam.esm.util.QueryCustomizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,9 +27,11 @@ public class GiftCertificateController {
     private final GiftCertificateService giftCertificateService;
 
     /**
-     * Finds all {@link GiftCertificate} objects. There is ability to provide {@code MultiValueMap<String, String>}
-     * to sort or search objects (for more information see {@link QueryCustomizer}).
+     * Finds all {@link GiftCertificate} objects. There is ability to provide search field names with search
+     * expressions and sort field names with sort type.
      *
+     * @param offset           count of records to skip
+     * @param limit            maximum count of records to return
      * @param tagName          the tag name
      * @param sortField        the sort field
      * @param sortType         the sort type
@@ -40,17 +41,19 @@ public class GiftCertificateController {
      * @throws ServerInternalErrorException if error occurs while finding all {@link GiftCertificate} objects
      */
     @GetMapping()
-    public List<GiftCertificate> findAll(@RequestParam(required = false) String tagName,
+    public List<GiftCertificate> findAll(@RequestParam Integer offset,
+                                         @RequestParam Integer limit,
+                                         @RequestParam(required = false) List<String> tagName,
                                          @RequestParam(required = false) List<String> sortField,
                                          @RequestParam(required = false) List<String> sortType,
                                          @RequestParam(required = false) List<String> searchField,
                                          @RequestParam(required = false) List<String> searchExpression) {
-        QueryCustomizer queryCustomizer = new QueryCustomizer(sortField, sortType, searchField, searchExpression);
         try {
             if (tagName != null) {
-                return giftCertificateService.findByTagName(tagName, queryCustomizer);
+                return giftCertificateService.findByTagName(tagName, sortField, sortType, searchField, searchExpression,
+                        offset, limit);
             }
-            return giftCertificateService.findAll(queryCustomizer);
+            return giftCertificateService.findAll(sortField, sortType, searchField, searchExpression, offset, limit);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), GIFT_CERTIFICATE_ENTITY_CODE);
         }

@@ -1,6 +1,7 @@
 package com.epam.esm.model.dao;
 
-import com.epam.esm.util.QueryCustomizer;
+import com.epam.esm.util.entity.SearchUnit;
+import com.epam.esm.util.entity.SortUnit;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,15 +11,15 @@ import java.util.Optional;
  *
  * @param <T> the type parameter
  */
-public interface BaseDao<T> {
+public interface Dao<T> {
     /**
      * Adds provided object to the data source.
      *
-     * @param t generic type object
+     * @param entity generic type object
      * @return added object
      * @throws DaoException if error occurs while adding object to the data source
      */
-    T add(T t) throws DaoException;
+    T add(T entity) throws DaoException;
 
     /**
      * Finds object in the data source by provided id.
@@ -32,32 +33,35 @@ public interface BaseDao<T> {
     /**
      * Finds all generic type objects in the repository.
      *
+     * @param offset count of records to skip
+     * @param limit  maximum count of records to return
      * @return list of all objects from data source
      * @throws DaoException the dao exception
      */
-    List<T> findAll() throws DaoException;
+    List<T> findAll(int offset, int limit) throws DaoException;
 
     /**
-     * Finds all generic type objects in the repository. Result depends on {@code QueryCustomizer} object settings
-     * provided to the method. It controls which object has to be included in list by changing sql query
-     * (for more details check {@link QueryCustomizer} class).
+     * Finds all generic type objects in the repository. Result depends on search and sort criteria
+     * provided to the method.
      *
-     * @param queryCustomizer the query customizer
+     * @param searchCriteria describes data to search by
+     * @param sortCriteria   describes how to sort fetched data
+     * @param offset         count of records to skip
+     * @param limit          maximum count of records to return
      * @return list of objects from data source, order and content of which controlled by {@code QueryCustomizer}
      * @throws DaoException if error occurs while finding objects in the data source
      */
-    List<T> findAll(QueryCustomizer queryCustomizer) throws DaoException;
+    List<T> findAll(List<SearchUnit> searchCriteria, List<SortUnit> sortCriteria, int offset, int limit) throws DaoException;
 
     /**
      * Updates object in the data source with provided id to new values from provided generic type object.
      * If provided object field value is null this field will not be updated.
      *
-     * @param id id of entity in the data source
-     * @param t  object with values to be updated
+     * @param entity object with values to be updated
      * @return added object
      * @throws DaoException if error occurs while updating object in the data source
      */
-    T update(long id, T t) throws DaoException;
+    T update(T entity) throws DaoException;
 
     /**
      * Deletes from data source the object with provided id.

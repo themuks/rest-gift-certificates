@@ -1,13 +1,15 @@
 package com.epam.esm.util.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Sort unit is entity for {@link com.epam.esm.util.QueryCustomizer} which represents field name (see {@link #fieldName}) and
- * the way this field will be sorted (see {@link #sortType}) during query to data source.
- */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SortUnit {
-    private final String fieldName;
-    private final String sortType;
+    private String sortField;
+    private boolean isAscending = true;
 }

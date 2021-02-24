@@ -5,7 +5,6 @@ import com.epam.esm.controller.exception.ServerInternalErrorException;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
-import com.epam.esm.util.QueryCustomizer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,9 +25,11 @@ public class TagController {
     private final TagService tagService;
 
     /**
-     * Finds all {@link Tag} objects. There is ability to provide {@code MultiValueMap<String, String>}
-     * to sort or search objects (for more information see {@link QueryCustomizer}).
+     * Finds all {@link Tag} objects. There is ability to provide search field names with search
+     * expressions and sort field names with sort type.
      *
+     * @param offset           count of records to skip
+     * @param limit            maximum count of records to return
      * @param sortField        the sort field
      * @param sortType         the sort type
      * @param searchField      the search field
@@ -37,13 +38,14 @@ public class TagController {
      * @throws ServerInternalErrorException if error occurs while finding all {@link Tag} objects
      */
     @GetMapping()
-    public List<Tag> findAll(@RequestParam(required = false) List<String> sortField,
+    public List<Tag> findAll(@RequestParam Integer offset,
+                             @RequestParam Integer limit,
+                             @RequestParam(required = false) List<String> sortField,
                              @RequestParam(required = false) List<String> sortType,
                              @RequestParam(required = false) List<String> searchField,
                              @RequestParam(required = false) List<String> searchExpression) {
-        QueryCustomizer queryCustomizer = new QueryCustomizer(sortField, sortType, searchField, searchExpression);
         try {
-            return tagService.findAll(queryCustomizer);
+            return tagService.findAll(sortField, sortType, searchField, searchExpression, offset, limit);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }

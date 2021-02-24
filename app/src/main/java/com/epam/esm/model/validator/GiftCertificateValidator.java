@@ -66,10 +66,10 @@ public class GiftCertificateValidator implements Validator {
                 errors.rejectValue("price", "price.negative");
             }
         }
-        Integer duration = giftCertificate.getDuration();
-        if (duration != null) {
-            if (duration < 0) {
-                errors.rejectValue("duration", "duration.negative");
+        Integer durationInDays = giftCertificate.getDurationInDays();
+        if (durationInDays != null) {
+            if (durationInDays < 0) {
+                errors.rejectValue("durationInDays", "durationInDays.negative");
             }
         }
         LocalDateTime createDate = giftCertificate.getCreateDate();

@@ -1,7 +1,6 @@
 package com.epam.esm.model.service;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.util.QueryCustomizer;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,9 +8,6 @@ import java.util.Optional;
 /**
  * The interface Tag service provides methods for service which performs operations with
  * {@link Tag} objects.
- * <p>
- * Some of the methods may need to provide {@link QueryCustomizer} object for more specific purposes.
- * </p>
  */
 public interface TagService {
     /**
@@ -37,23 +33,25 @@ public interface TagService {
     Optional<Tag> findById(long id) throws ServiceException;
 
     /**
-     * Finds all {@link Tag} and returns list.
+     * Finds all {@link Tag} and returns list. Order and content of list depends on lists of field names,
+     * types of order and search expressions provided to the method.
      *
-     * @return list of found {@link Tag} objects
-     * @throws ServiceException if error occurs while finding all {@link Tag} objects
-     */
-    List<Tag> findAll() throws ServiceException;
-
-    /**
-     * Finds all {@link Tag} and returns list. Order and content of list depends on {@link QueryCustomizer}
-     * provided to the method.
-     *
-     * @param queryCustomizer query customizer which affects result list
+     * @param sortField        list of field names to sort
+     * @param sortType         list of sort types
+     * @param searchField      list of field names to search by
+     * @param searchExpression list of search expressions
+     * @param offset           count of records to skip
+     * @param limit            maximum count of records to return
      * @return list of found {@link Tag} objects
      * @throws ServiceException         if error occurs while finding {@link Tag} objects
      * @throws IllegalArgumentException if query customizer is null
      */
-    List<Tag> findAll(QueryCustomizer queryCustomizer) throws ServiceException;
+    List<Tag> findAll(List<String> sortField,
+                      List<String> sortType,
+                      List<String> searchField,
+                      List<String> searchExpression,
+                      int offset,
+                      int limit) throws ServiceException;
 
     /**
      * Deletes {@link Tag} object with provided id from repository.

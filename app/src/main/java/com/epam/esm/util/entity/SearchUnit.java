@@ -1,13 +1,15 @@
 package com.epam.esm.util.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-/**
- * Search unit is entity for {@link com.epam.esm.util.QueryCustomizer} which represents field name (see {@link #fieldName}) and
- * the way this field will be searched (see {@link #searchExpression}) during query to data source.
- */
 @Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class SearchUnit {
-    private final String fieldName;
-    private final String searchExpression;
+    private String searchFieldName;
+    private String searchExpression;
 }

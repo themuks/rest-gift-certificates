@@ -6,8 +6,11 @@ import com.epam.esm.model.dao.TagDao;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import com.epam.esm.model.validator.EntityValidator;
+import com.epam.esm.model.validator.QueryParameterValidator;
 import com.epam.esm.model.validator.TagValidator;
-import com.epam.esm.util.QueryCustomizer;
+import com.epam.esm.util.CriteriaConstructor;
+import com.epam.esm.util.entity.SearchUnit;
+import com.epam.esm.util.entity.SortUnit;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -59,22 +62,19 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<Tag> findAll() throws ServiceException {
-        try {
-            return tagDao.findAll();
-        } catch (DaoException e) {
-            throw new ServiceException(e.getLocalizedMessage(), e);
+    public List<Tag> findAll(List<String> sortField,
+                             List<String> sortType,
+                             List<String> searchField,
+                             List<String> searchExpression,
+                             int offset,
+                             int limit) throws ServiceException {
+        if (!QueryParameterValidator.isOffsetValid(offset) || !QueryParameterValidator.isLimitValid(limit)) {
+            throw new IllegalArgumentException("Query parameters such as offset or/and limit are incorrect");
         }
-    }
-
-    @Override
-    public List<Tag> findAll(QueryCustomizer queryCustomizer) throws ServiceException {
-        if (queryCustomizer == null) {
-            throw new IllegalArgumentException("The supplied [QueryCustomizer] is " +
-                    "required and must not be null");
-        }
+        List<SearchUnit> searchCriteria = CriteriaConstructor.convertListsToSearchCriteria(searchField, searchExpression);
+        List<SortUnit> sortCriteria = CriteriaConstructor.convertListsToSortCriteria(sortField, sortType);
         try {
-            return tagDao.findAll(queryCustomizer);
+            return tagDao.findAll(searchCriteria, sortCriteria, offset, limit);
         } catch (DaoException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }

@@ -1,37 +1,30 @@
 package com.epam.esm.config;
 
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.support.ResourceBundleMessageSource;
-import org.springframework.jdbc.datasource.DataSourceTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
 
 @Configuration
-@ComponentScan("com.epam.esm")
-@EnableWebMvc
-@EnableTransactionManagement
-@Import(DatabaseConfig.class)
+@EnableAutoConfiguration
 public class SpringConfig {
     private static final String MESSAGES_BUNDLE = "messages";
-    private final DatabaseConfig databaseConfig;
-
-    public SpringConfig(DatabaseConfig databaseConfig) {
-        this.databaseConfig = databaseConfig;
-    }
+    private static final String PACKAGE_NAME = "com.epam.esm";
 
     @Bean
-    public PlatformTransactionManager transactionManagerBean() {
-        return new DataSourceTransactionManager(databaseConfig.mySqlDataSource());
-    }
-
-    @Bean
-    public ResourceBundleMessageSource resourceBundleMessageSourceBean() {
+    public ResourceBundleMessageSource resourceBundleMessageSource() {
         ResourceBundleMessageSource resourceBundleMessageSource = new ResourceBundleMessageSource();
         resourceBundleMessageSource.setBasename(MESSAGES_BUNDLE);
         return resourceBundleMessageSource;
+    }
+
+    @Bean
+    public EntityManager entityManager() {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory(PACKAGE_NAME);
+        return emf.createEntityManager();
     }
 }

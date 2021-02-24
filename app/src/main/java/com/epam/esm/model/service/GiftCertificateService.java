@@ -1,7 +1,6 @@
 package com.epam.esm.model.service;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.util.QueryCustomizer;
 
 import java.util.List;
 import java.util.Optional;
@@ -9,9 +8,6 @@ import java.util.Optional;
 /**
  * The interface Gift certificate service provides methods for service which performs operations with
  * {@link GiftCertificate} objects.
- * <p>
- * Some of the methods may need to provide {@link QueryCustomizer} object for more specific purposes.
- * </p>
  */
 public interface GiftCertificateService {
     /**
@@ -37,23 +33,25 @@ public interface GiftCertificateService {
     Optional<GiftCertificate> findById(long id) throws ServiceException;
 
     /**
-     * Finds all {@link GiftCertificate} and returns list.
+     * Finds all {@link GiftCertificate} and returns list. Order and content of list depends on lists of field names,
+     * types of order and search expressions provided to the method.
      *
-     * @return list of found {@link GiftCertificate} objects
-     * @throws ServiceException if error occurs while finding all {@link GiftCertificate} objects
-     */
-    List<GiftCertificate> findAll() throws ServiceException;
-
-    /**
-     * Finds all {@link GiftCertificate} and returns list. Order and content of list depends on {@link QueryCustomizer}
-     * provided to the method.
-     *
-     * @param queryCustomizer query customizer which affects result list
+     * @param sortField        list of field names to sort
+     * @param sortType         list of sort types
+     * @param searchField      list of field names to search by
+     * @param searchExpression list of search expressions
+     * @param offset           count of records to skip
+     * @param limit            maximum count of records to return
      * @return list of found {@link GiftCertificate} objects
      * @throws ServiceException         if error occurs while finding {@link GiftCertificate} objects
      * @throws IllegalArgumentException if query customizer is null
      */
-    List<GiftCertificate> findAll(QueryCustomizer queryCustomizer) throws ServiceException;
+    List<GiftCertificate> findAll(List<String> sortField,
+                                  List<String> sortType,
+                                  List<String> searchField,
+                                  List<String> searchExpression,
+                                  int offset,
+                                  int limit) throws ServiceException;
 
     /**
      * Updates {@link GiftCertificate} object with provided id in the repository with {@link GiftCertificate}
@@ -81,24 +79,25 @@ public interface GiftCertificateService {
     GiftCertificate delete(long id) throws ServiceException;
 
     /**
-     * Finds {@link GiftCertificate} objects by tag name and returns list.
+     * Finds {@link GiftCertificate} objects by tag name and returns list. Order and content of list depends on lists of field names,
+     * types of order and search expressions provided to the method.
      *
-     * @param tagName tag name to search by
-     * @return list of found {@link GiftCertificate} objects
-     * @throws ServiceException         if error occurs while finding {@link GiftCertificate} objects by tag name
-     * @throws IllegalArgumentException if provided tag name is null
-     */
-    List<GiftCertificate> findByTagName(String tagName) throws ServiceException;
-
-    /**
-     * Finds {@link GiftCertificate} objects by tag name and returns list. Order and content of list
-     * depends on {@link QueryCustomizer} provided to the method.
-     *
-     * @param tagName         tag name to search by
-     * @param queryCustomizer query customizer which affects result list
+     * @param tagName
+     * @param sortField        list of field names to sort
+     * @param sortType         list of sort types
+     * @param searchField      list of field names to search by
+     * @param searchExpression list of search expressions
+     * @param offset           count of records to skip
+     * @param limit            maximum count of records to return
      * @return list of found {@link GiftCertificate} objects
      * @throws ServiceException         if error occurs while finding {@link GiftCertificate} objects by tag name
      * @throws IllegalArgumentException if tag name or query customizer objects are null
      */
-    List<GiftCertificate> findByTagName(String tagName, QueryCustomizer queryCustomizer) throws ServiceException;
+    List<GiftCertificate> findByTagName(List<String> tagName,
+                                        List<String> sortField,
+                                        List<String> sortType,
+                                        List<String> searchField,
+                                        List<String> searchExpression,
+                                        int offset,
+                                        int limit) throws ServiceException;
 }
