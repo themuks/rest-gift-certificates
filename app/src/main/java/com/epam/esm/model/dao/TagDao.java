@@ -10,4 +10,11 @@ import com.epam.esm.entity.Tag;
  * @see Dao
  */
 public interface TagDao extends Dao<Tag> {
+    /**
+     * Find most used tag around users with highest cost of all orders.
+     *
+     * @return found tag
+     * @throws DaoException if error occurs while finding most used {@code Tag} object
+     */
+    Tag findMostUsedTag() throws DaoException;
 }

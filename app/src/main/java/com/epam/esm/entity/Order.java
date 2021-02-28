@@ -1,9 +1,7 @@
 package com.epam.esm.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -15,13 +13,14 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "order")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order implements Serializable {
+public class Order extends RepresentationModel<Order> implements Serializable {
     @Min(1)
     @Id
     @GeneratedValue

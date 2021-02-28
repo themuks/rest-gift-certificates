@@ -6,14 +6,19 @@ import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controller for performing operations with {@link GiftCertificate} objects.
@@ -24,6 +29,8 @@ import java.util.List;
 @Validated
 public class GiftCertificateController {
     private static final String GIFT_CERTIFICATE_ENTITY_CODE = "01";
+    private static final String UPDATE = "update";
+    private static final String DELETE = "delete";
     private final GiftCertificateService giftCertificateService;
 
     /**
@@ -41,19 +48,43 @@ public class GiftCertificateController {
      * @throws ServerInternalErrorException if error occurs while finding all {@link GiftCertificate} objects
      */
     @GetMapping()
-    public List<GiftCertificate> findAll(@RequestParam Integer offset,
-                                         @RequestParam Integer limit,
-                                         @RequestParam(required = false) List<String> tagName,
-                                         @RequestParam(required = false) List<String> sortField,
-                                         @RequestParam(required = false) List<String> sortType,
-                                         @RequestParam(required = false) List<String> searchField,
-                                         @RequestParam(required = false) List<String> searchExpression) {
+    public CollectionModel<GiftCertificate> findAll(@RequestParam Integer offset,
+                                                    @RequestParam Integer limit,
+                                                    @RequestParam(required = false) List<String> tagName,
+                                                    @RequestParam(required = false) List<String> sortField,
+                                                    @RequestParam(required = false) List<String> sortType,
+                                                    @RequestParam(required = false) List<String> searchField,
+                                                    @RequestParam(required = false) List<String> searchExpression) {
         try {
             if (tagName != null) {
-                return giftCertificateService.findByTagName(tagName, sortField, sortType, searchField, searchExpression,
-                        offset, limit);
+                Link link = linkTo(methodOn(GiftCertificateController.class)
+                        .findAll(offset, limit, tagName, sortField, sortType, searchField, searchExpression))
+                        .withSelfRel();
+                List<GiftCertificate> giftCertificatesByTagName = giftCertificateService.findByTagName(tagName,
+                        sortField, sortType, searchField, searchExpression, offset, limit);
+                for (GiftCertificate giftCertificate : giftCertificatesByTagName) {
+                    Long id = giftCertificate.getId();
+                    Link self = linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel();
+                    Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(
+                            UPDATE);
+                    Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
+                    giftCertificate.add(self, update, delete);
+                }
+                return CollectionModel.of(giftCertificatesByTagName, link);
             }
-            return giftCertificateService.findAll(sortField, sortType, searchField, searchExpression, offset, limit);
+            Link link = linkTo(methodOn(GiftCertificateController.class)
+                    .findAll(offset, limit, null, sortField, sortType, searchField, searchExpression))
+                    .withSelfRel();
+            List<GiftCertificate> giftCertificates = giftCertificateService.findAll(sortField, sortType, searchField,
+                    searchExpression, offset, limit);
+            for (GiftCertificate giftCertificate : giftCertificates) {
+                Long id = giftCertificate.getId();
+                Link self = linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel();
+                Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
+                Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
+                giftCertificate.add(self, update, delete);
+            }
+            return CollectionModel.of(giftCertificates, link);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), GIFT_CERTIFICATE_ENTITY_CODE);
         }
@@ -67,10 +98,15 @@ public class GiftCertificateController {
      * @throws ServerInternalErrorException if error occurs while finding {@link GiftCertificate} objects by id
      */
     @GetMapping("/{id}")
-    public GiftCertificate findById(@PathVariable long id) {
+    public EntityModel<GiftCertificate> findById(@PathVariable long id) {
+        Link self = linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel();
+        Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
+        Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
         try {
-            return giftCertificateService.findById(id).orElseThrow(
+            GiftCertificate giftCertificate = giftCertificateService.findById(id).orElseThrow(
                     () -> new EntityNotFoundException(id, GIFT_CERTIFICATE_ENTITY_CODE));
+            giftCertificate.add(self, update, delete);
+            return EntityModel.of(giftCertificate);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), GIFT_CERTIFICATE_ENTITY_CODE);
         }
@@ -83,10 +119,18 @@ public class GiftCertificateController {
      * @return added {@link GiftCertificate} with HTTP code status
      * @throws ServerInternalErrorException if error occurs while adding {@link GiftCertificate} object
      */
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping()
-    public ResponseEntity<GiftCertificate> add(@Valid @NotNull @RequestBody GiftCertificate giftCertificate) {
+    public EntityModel<GiftCertificate> add(@Valid @NotNull @RequestBody GiftCertificate giftCertificate) {
+        Link self = linkTo(methodOn(GiftCertificateController.class).add(giftCertificate)).withSelfRel();
         try {
-            return new ResponseEntity<>(giftCertificateService.add(giftCertificate), HttpStatus.CREATED);
+            GiftCertificate addedEntity = giftCertificateService.add(giftCertificate);
+            Link update = linkTo(methodOn(GiftCertificateController.class).update(giftCertificate.getId(), null))
+                    .withRel(UPDATE);
+            Link delete = linkTo(methodOn(GiftCertificateController.class).delete(giftCertificate.getId()))
+                    .withRel(DELETE);
+            giftCertificate.add(self, update, delete);
+            return EntityModel.of(addedEntity);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), GIFT_CERTIFICATE_ENTITY_CODE);
         }
@@ -102,10 +146,14 @@ public class GiftCertificateController {
      * @throws ServerInternalErrorException if error occurs while updating {@link GiftCertificate} object
      */
     @PatchMapping("/{id}")
-    public GiftCertificate update(@PathVariable long id,
-                                  @Valid @NotNull @RequestBody GiftCertificate patch) {
+    public EntityModel<GiftCertificate> update(@PathVariable long id,
+                                               @Valid @NotNull @RequestBody GiftCertificate patch) {
+        Link self = linkTo(methodOn(GiftCertificateController.class).update(id, patch)).withSelfRel();
+        Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
         try {
-            return giftCertificateService.update(id, patch);
+            GiftCertificate updatedGiftCertificate = giftCertificateService.update(id, patch);
+            updatedGiftCertificate.add(self, delete);
+            return EntityModel.of(updatedGiftCertificate);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), GIFT_CERTIFICATE_ENTITY_CODE);
         }
@@ -119,9 +167,13 @@ public class GiftCertificateController {
      * @throws ServerInternalErrorException if error occurs while deleting {@link GiftCertificate} object
      */
     @DeleteMapping("/{id}")
-    public GiftCertificate delete(@PathVariable long id) {
+    public EntityModel<GiftCertificate> delete(@PathVariable long id) {
+        Link self = linkTo(methodOn(GiftCertificateController.class).delete(id)).withSelfRel();
+        Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
         try {
-            return giftCertificateService.delete(id);
+            GiftCertificate deletedGiftCertificate = giftCertificateService.delete(id);
+            deletedGiftCertificate.add(self, update);
+            return EntityModel.of(deletedGiftCertificate);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), GIFT_CERTIFICATE_ENTITY_CODE);
         }

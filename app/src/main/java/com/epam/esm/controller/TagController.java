@@ -6,13 +6,18 @@ import com.epam.esm.entity.Tag;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * Controller for performing operations with {@link Tag} objects.
@@ -22,6 +27,7 @@ import java.util.List;
 @RequestMapping("/tags")
 public class TagController {
     private static final String TAG_ENTITY_CODE = "02";
+    private static final String DELETE = "delete";
     private final TagService tagService;
 
     /**
@@ -38,14 +44,24 @@ public class TagController {
      * @throws ServerInternalErrorException if error occurs while finding all {@link Tag} objects
      */
     @GetMapping()
-    public List<Tag> findAll(@RequestParam Integer offset,
-                             @RequestParam Integer limit,
-                             @RequestParam(required = false) List<String> sortField,
-                             @RequestParam(required = false) List<String> sortType,
-                             @RequestParam(required = false) List<String> searchField,
-                             @RequestParam(required = false) List<String> searchExpression) {
+    public CollectionModel<Tag> findAll(@RequestParam Integer offset,
+                                        @RequestParam Integer limit,
+                                        @RequestParam(required = false) List<String> sortField,
+                                        @RequestParam(required = false) List<String> sortType,
+                                        @RequestParam(required = false) List<String> searchField,
+                                        @RequestParam(required = false) List<String> searchExpression) {
+        Link link = linkTo(methodOn(TagController.class)
+                .findAll(offset, limit, sortField, sortType, searchField, searchExpression))
+                .withSelfRel();
         try {
-            return tagService.findAll(sortField, sortType, searchField, searchExpression, offset, limit);
+            List<Tag> tags = tagService.findAll(sortField, sortType, searchField, searchExpression, offset, limit);
+            for (Tag tag : tags) {
+                Long id = tag.getId();
+                Link self = linkTo(methodOn(TagController.class).findById(id)).withSelfRel();
+                Link delete = linkTo(methodOn(TagController.class).delete(id)).withRel(DELETE);
+                tag.add(self, delete);
+            }
+            return CollectionModel.of(tags, link);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
@@ -59,9 +75,13 @@ public class TagController {
      * @throws ServerInternalErrorException if error occurs while finding {@link Tag} objects by id
      */
     @GetMapping("/{id}")
-    public Tag findById(@PathVariable long id) {
+    public EntityModel<Tag> findById(@PathVariable long id) {
+        Link self = linkTo(methodOn(TagController.class).findById(id)).withSelfRel();
+        Link delete = linkTo(methodOn(TagController.class).delete(id)).withRel(DELETE);
         try {
-            return tagService.findById(id).orElseThrow(() -> new EntityNotFoundException(id, TAG_ENTITY_CODE));
+            Tag tag = tagService.findById(id).orElseThrow(() -> new EntityNotFoundException(id, TAG_ENTITY_CODE));
+            tag.add(self, delete);
+            return EntityModel.of(tag);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
@@ -74,10 +94,15 @@ public class TagController {
      * @return added {@link Tag}
      * @throws ServerInternalErrorException if error occurs while adding {@link Tag} object
      */
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping()
-    public ResponseEntity<Tag> add(@Valid @NotNull @RequestBody Tag tag) {
+    public EntityModel<Tag> add(@Valid @NotNull @RequestBody Tag tag) {
+        Link self = linkTo(methodOn(TagController.class).add(tag)).withSelfRel();
         try {
-            return new ResponseEntity<>(tagService.add(tag), HttpStatus.CREATED);
+            Tag addedTag = tagService.add(tag);
+            Link delete = linkTo(methodOn(TagController.class).delete(tag.getId())).withRel(DELETE);
+            addedTag.add(self, delete);
+            return EntityModel.of(addedTag);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }
@@ -91,9 +116,24 @@ public class TagController {
      * @throws ServerInternalErrorException if error occurs while deleting {@link Tag} object
      */
     @DeleteMapping("/{id}")
-    public Tag delete(@PathVariable long id) {
+    public EntityModel<Tag> delete(@PathVariable long id) {
+        Link self = linkTo(methodOn(TagController.class).delete(id)).withSelfRel();
         try {
-            return tagService.delete(id);
+            Tag deletedTag = tagService.delete(id);
+            deletedTag.add(self);
+            return EntityModel.of(deletedTag);
+        } catch (ServiceException e) {
+            throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
+        }
+    }
+
+    @GetMapping("/popular-tag")
+    public EntityModel<Tag> findMostUsedTag() {
+        Link self = linkTo(methodOn(TagController.class).findMostUsedTag()).withSelfRel();
+        try {
+            Tag mostUsedTag = tagService.findMostUsedTag();
+            mostUsedTag.add(self);
+            return EntityModel.of(mostUsedTag);
         } catch (ServiceException e) {
             throw new ServerInternalErrorException(e.getLocalizedMessage(), TAG_ENTITY_CODE);
         }

@@ -63,4 +63,6 @@ public interface TagService {
      *                                  (see {@link com.epam.esm.model.validator.EntityValidator})
      */
     Tag delete(long id) throws ServiceException;
+
+    Tag findMostUsedTag() throws ServiceException;
 }

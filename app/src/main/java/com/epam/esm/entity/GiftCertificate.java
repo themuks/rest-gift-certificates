@@ -1,9 +1,7 @@
 package com.epam.esm.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -16,13 +14,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "gift_certificate")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GiftCertificate implements Serializable {
+public class GiftCertificate extends RepresentationModel<GiftCertificate> implements Serializable {
     @Min(1)
     @Id
     @GeneratedValue
@@ -49,3 +48,6 @@ public class GiftCertificate implements Serializable {
             inverseJoinColumns = {@JoinColumn(name = "tag_id")})
     private List<Tag> tags;
 }
+
+
+

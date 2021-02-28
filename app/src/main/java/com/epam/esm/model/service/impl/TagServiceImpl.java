@@ -91,4 +91,13 @@ public class TagServiceImpl implements TagService {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
     }
+
+    @Override
+    public Tag findMostUsedTag() throws ServiceException {
+        try {
+            return tagDao.findMostUsedTag();
+        } catch (DaoException e) {
+            throw new ServiceException(e.getLocalizedMessage(), e);
+        }
+    }
 }

@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.hateoas.RepresentationModel;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,7 +20,7 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tag implements Serializable {
+public class Tag extends RepresentationModel<Tag> implements Serializable {
     @Min(1)
     @Id
     @GeneratedValue
