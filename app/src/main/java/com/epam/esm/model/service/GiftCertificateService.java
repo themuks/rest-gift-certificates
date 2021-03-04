@@ -82,7 +82,7 @@ public interface GiftCertificateService {
      * Finds {@link GiftCertificate} objects by tag name and returns list. Order and content of list depends on lists of field names,
      * types of order and search expressions provided to the method.
      *
-     * @param tagName
+     * @param tagName          name of tag to search gift certificate by
      * @param sortField        list of field names to sort
      * @param sortType         list of sort types
      * @param searchField      list of field names to search by

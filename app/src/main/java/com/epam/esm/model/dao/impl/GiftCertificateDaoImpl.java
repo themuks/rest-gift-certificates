@@ -3,7 +3,6 @@ package com.epam.esm.model.dao.impl;
 import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.AbstractDao;
-import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
 import com.epam.esm.util.entity.SearchUnit;
 import com.epam.esm.util.entity.SortUnit;
@@ -30,7 +29,7 @@ public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> impleme
                                                List<SearchUnit> searchCriteria,
                                                List<SortUnit> sortCriteria,
                                                int offset,
-                                               int limit) throws DaoException {
+                                               int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<GiftCertificate> criteriaQuery = criteriaBuilder.createQuery(GiftCertificate.class);
         Root<GiftCertificate> root = criteriaQuery.from(GiftCertificate.class);

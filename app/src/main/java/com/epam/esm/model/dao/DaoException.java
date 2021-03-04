@@ -1,14 +1,15 @@
 package com.epam.esm.model.dao;
 
+import com.epam.esm.util.MessageUtil;
+
 /**
  * Thrown to indicate that data object layer has errors
  */
 public class DaoException extends Exception {
-    public DaoException() {
-    }
+    private String messageKey = "message.exception.dao.default";
 
-    public DaoException(String message) {
-        super(message);
+    public DaoException(String messageKey) {
+        this.messageKey = messageKey;
     }
 
     public DaoException(String message, Throwable cause) {
@@ -17,5 +18,10 @@ public class DaoException extends Exception {
 
     public DaoException(Throwable cause) {
         super(cause);
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+        return MessageUtil.getMessageForLocale(messageKey);
     }
 }

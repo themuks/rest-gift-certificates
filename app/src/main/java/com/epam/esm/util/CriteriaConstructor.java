@@ -6,9 +6,11 @@ import com.epam.esm.util.entity.SortUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Criteria constructor is class for converting separate lists into more convenient form.
+ */
 public class CriteriaConstructor {
     private static final String DESC = "DESC";
-    private static final String PERCENT = "%";
 
     private CriteriaConstructor() {
     }

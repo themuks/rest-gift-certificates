@@ -52,6 +52,6 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
         result = (Object[]) entityManager.createNativeQuery(FIND_MOST_USED_TAG_BY_USER_ID_QUERY).setParameter(USER_ID, userId).getSingleResult();
         long mostUsedTagId = ((BigInteger) result[ZERO]).longValue();
         Optional<Tag> tagOptional = findById(mostUsedTagId);
-        return tagOptional.orElseThrow(() -> new DaoException("Tag with id = (" + mostUsedTagId + ") not found"));
+        return tagOptional.orElseThrow(() -> new DaoException("message.exception.dao.not_found"));
     }
 }

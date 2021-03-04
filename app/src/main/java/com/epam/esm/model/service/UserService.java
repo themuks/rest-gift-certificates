@@ -42,9 +42,9 @@ public interface UserService {
     /**
      * Find orders of user.
      *
-     * @param id id to search user by
-     * @param offset
-     * @param limit
+     * @param id     id to search user by
+     * @param offset count of records to skip
+     * @param limit  maximum count of records to return
      * @return list of found {@link Order} objects
      * @throws ServiceException         if error occurs while finding {@link User} objects
      * @throws IllegalArgumentException if query customizer is null

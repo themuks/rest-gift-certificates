@@ -17,4 +17,25 @@ public class EntityNotFoundException extends RuntimeException {
         this.id = id;
         this.entityCode = entityCode;
     }
+
+    public EntityNotFoundException() {
+        super();
+    }
+
+    public EntityNotFoundException(String message) {
+        super(message);
+    }
+
+    public EntityNotFoundException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public EntityNotFoundException(Throwable cause) {
+        super(cause);
+    }
+
+    @Override
+    public String getLocalizedMessage() {
+        return super.getLocalizedMessage();
+    }
 }

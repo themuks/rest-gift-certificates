@@ -60,6 +60,9 @@ public class UserServiceImpl implements UserService {
         if (!EntityValidator.isIdValid(id)) {
             throw new IllegalArgumentException("Id must be positive");
         }
+        if (!QueryParameterValidator.isOffsetValid(offset) || !QueryParameterValidator.isLimitValid(limit)) {
+            throw new IllegalArgumentException("Query parameters such as offset or/and limit are incorrect");
+        }
         try {
             return userDao.findOrdersOfUser(id, offset, limit);
         } catch (DaoException e) {

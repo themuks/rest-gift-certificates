@@ -54,25 +54,25 @@ public abstract class AbstractDao<T> implements Dao<T> {
     }
 
     @Override
-    public T add(T entity) throws DaoException {
+    public T add(T entity) {
         entityManager.persist(entity);
         return entity;
     }
 
     @Override
-    public Optional<T> findById(long id) throws DaoException {
+    public Optional<T> findById(long id) {
         return Optional.ofNullable(entityManager.find(clazz, id));
     }
 
     @Override
-    public List<T> findAll(int offset, int limit) throws DaoException {
+    public List<T> findAll(int offset, int limit) {
         return entityManager.createQuery(FROM + clazz.getName(), clazz)
                 .setFirstResult(offset)
                 .setMaxResults(limit)
                 .getResultList();
     }
 
-    public List<T> findAll(List<SearchUnit> searchCriteria, List<SortUnit> sortCriteria, int offset, int limit) throws DaoException {
+    public List<T> findAll(List<SearchUnit> searchCriteria, List<SortUnit> sortCriteria, int offset, int limit) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<T> criteriaQuery = criteriaBuilder.createQuery(clazz);
         Root<T> root = criteriaQuery.from(clazz);
@@ -88,7 +88,7 @@ public abstract class AbstractDao<T> implements Dao<T> {
     }
 
     @Override
-    public T update(T entity) throws DaoException {
+    public T update(T entity) {
         return entityManager.merge(entity);
     }
 
@@ -96,7 +96,7 @@ public abstract class AbstractDao<T> implements Dao<T> {
     public T delete(long id) throws DaoException {
         Optional<T> optionalEntity = findById(id);
         T entity = optionalEntity.orElseThrow(() ->
-                new DaoException("Error while deleting tag. Object with such id = (" + id + ") is not exist"));
+                new DaoException("message.exception.dao.not_found"));
         delete(entity);
         return entity;
     }
