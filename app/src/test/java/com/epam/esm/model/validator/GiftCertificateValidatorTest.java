@@ -38,7 +38,7 @@ class GiftCertificateValidatorTest {
                 .id(-1L)
                 .name("")
                 .description("")
-                .duration(-1)
+                .durationInDays(-1)
                 .price(new BigDecimal(-10))
                 .createDate(localDateTime)
                 .lastUpdateDate(localDateTime)

@@ -1,15 +1,16 @@
 package com.epam.esm.model.service.impl;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.GiftCertificateDao;
+import com.epam.esm.model.dao.TagDao;
+import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.ServiceException;
-import com.epam.esm.util.QueryCustomizer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,35 +19,30 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
+@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 class GiftCertificateServiceImplTest {
     @Mock
     private GiftCertificateDao giftCertificateDao;
+    @Mock
+    private TagDao tagDao;
     private GiftCertificateServiceImpl giftCertificateService;
 
     @BeforeEach
     void setUp() {
-        giftCertificateService = new GiftCertificateServiceImpl(giftCertificateDao);
+        giftCertificateService = new GiftCertificateServiceImpl(giftCertificateDao, tagDao);
     }
 
     @Test
-    void add_ValidGiftCertificateGiven_ShouldReturnGeneratedId() throws DaoException {
-        LocalDateTime dateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
-        GiftCertificate giftCertificate = GiftCertificate.builder()
-                .name("name")
-                .description("description")
-                .price(new BigDecimal(123))
-                .duration(1)
-                .createDate(dateTime)
-                .lastUpdateDate(dateTime.minusDays(1))
-                .tags(new ArrayList<>())
-                .build();
-        when(giftCertificateDao.add(any(GiftCertificate.class))).thenReturn(new GiftCertificate());
+    void add_ValidGiftCertificateGiven_ShouldReturnEntityWithGeneratedId() throws DaoException {
+        GiftCertificate expected = GiftCertificate.builder().id(1L).name("name").build();
+        when(giftCertificateDao.add(any(GiftCertificate.class))).thenReturn(expected);
         try {
-            GiftCertificate actual = giftCertificateService.add(giftCertificate);
-            GiftCertificate expected = new GiftCertificate();
+            GiftCertificate actual = giftCertificateService.add(expected);
             assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
@@ -59,17 +55,14 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void add_DaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            when(giftCertificateDao.add(any(GiftCertificate.class))).thenThrow(new DaoException());
-        } catch (DaoException ignored) {
-        }
+    void add_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
+        when(giftCertificateDao.add(any(GiftCertificate.class))).thenThrow(new DaoException());
         LocalDateTime dateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .name("name")
                 .description("description")
                 .price(new BigDecimal(123))
-                .duration(1)
+                .durationInDays(1)
                 .createDate(dateTime)
                 .lastUpdateDate(dateTime.minusDays(1))
                 .tags(new ArrayList<>())
@@ -79,48 +72,73 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void findById_InvalidIdGiven_ShouldThrowInvalidArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.findById(-1));
+        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.findById(0));
     }
 
     @Test
     void findById_ValidIdGivenObjectExists_ShouldReturnOptionalWithObject() throws DaoException {
-        when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.of(new GiftCertificate()));
+        LocalDateTime dateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .id(1L)
+                .name("name")
+                .description("description")
+                .price(new BigDecimal(123))
+                .durationInDays(1)
+                .createDate(dateTime)
+                .lastUpdateDate(dateTime.minusDays(1))
+                .tags(new ArrayList<>())
+                .build();
+        when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.of(giftCertificate));
+        Optional<GiftCertificate> optionalGiftCertificate = Optional.empty();
         try {
-            Optional<GiftCertificate> actual = giftCertificateService.findById(1);
-            Optional<GiftCertificate> expected = Optional.of(new GiftCertificate());
-            assertEquals(expected, actual);
+            optionalGiftCertificate = giftCertificateService.findById(1L);
         } catch (ServiceException e) {
             fail(e);
+        }
+        if (optionalGiftCertificate.isPresent()) {
+            GiftCertificate actual = optionalGiftCertificate.get();
+            assertEquals(giftCertificate, actual);
+        } else {
+            fail();
         }
     }
 
     @Test
     void findById_ValidIdGivenObjectNotExist_ShouldReturnEmptyOptional() throws DaoException {
         when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.empty());
+        Optional<GiftCertificate> optionalGiftCertificate = Optional.empty();
         try {
-            Optional<GiftCertificate> actual = giftCertificateService.findById(1);
-            Optional<GiftCertificate> expected = Optional.empty();
-            assertEquals(expected, actual);
+            optionalGiftCertificate = giftCertificateService.findById(1L);
         } catch (ServiceException e) {
             fail(e);
         }
+        assertTrue(optionalGiftCertificate.isEmpty());
     }
 
     @Test
-    void findById_DaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            when(giftCertificateDao.findById(anyLong())).thenThrow(new DaoException());
-        } catch (DaoException ignored) {
-        }
+    void findById_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
+        when(giftCertificateDao.findById(anyLong())).thenThrow(new DaoException());
         assertThrows(ServiceException.class, () -> giftCertificateService.findById(1));
     }
 
     @Test
-    void findAll_Nothing_ShouldReturnList() throws DaoException {
-        when(giftCertificateDao.findAll()).thenReturn(List.of(new GiftCertificate()));
+    void findAll_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
+        when(giftCertificateDao.findAll(anyList(), anyList(), anyInt(), anyInt())).thenThrow(new DaoException());
+        assertThrows(ServiceException.class,
+                () -> giftCertificateService.findAll(List.of(), List.of(), List.of(), List.of(), 1, 1));
+    }
+
+    @Test
+    void findAll_ValidParametersGiven_ShouldReturnList() throws DaoException {
+        List<GiftCertificate> expected = List.of(new GiftCertificate());
+        when(giftCertificateDao.findAll(anyList(), anyList(), anyInt(), anyInt())).thenReturn(expected);
         try {
-            List<GiftCertificate> actual = giftCertificateService.findAll();
-            List<GiftCertificate> expected = List.of(new GiftCertificate());
+            List<GiftCertificate> actual = giftCertificateService.findAll(new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    0,
+                    501);
             assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
@@ -128,96 +146,76 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void findAll_DaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            when(giftCertificateDao.findAll()).thenThrow(new DaoException());
-        } catch (DaoException ignored) {
-        }
-        assertThrows(ServiceException.class, () -> giftCertificateService.findAll());
-    }
-
-    @Test
-    void findAll_ValidQueryCustomizerGiven_ShouldReturnList() throws DaoException {
-        when(giftCertificateDao.findAll(any(QueryCustomizer.class))).thenReturn(List.of(new GiftCertificate()));
-        try {
-            List<GiftCertificate> actual = giftCertificateService.findAll(new QueryCustomizer());
-            List<GiftCertificate> expected = List.of(new GiftCertificate());
-            assertEquals(expected, actual);
-        } catch (ServiceException e) {
-            fail(e);
-        }
-    }
-
-    @Test
-    void findAll_NullGiven_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.findAll(null));
-    }
-
-    @Test
-    void findAll_ValidQueryCustomizerGivenDaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            when(giftCertificateDao.findAll(any(QueryCustomizer.class))).thenThrow(new DaoException());
-        } catch (DaoException ignored) {
-        }
-        assertThrows(ServiceException.class, () -> giftCertificateService.findAll(new QueryCustomizer()));
+    void findAll_InvalidParametersGiven_ShouldThrowIllegalArgumentException() {
+        assertThrows(IllegalArgumentException.class,
+                () -> giftCertificateService.findAll(null, null, null, null, -1, -1));
     }
 
     @Test
     void update_ValidIdAndGiftCertificateGiven_Success() throws DaoException {
-        long id = 1;
-        GiftCertificate giftCertificate = new GiftCertificate();
+        when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.of(new GiftCertificate()));
+        when(giftCertificateDao.update(any(GiftCertificate.class))).thenReturn(new GiftCertificate());
         try {
-            giftCertificateService.update(id, giftCertificate);
+            GiftCertificate actual = giftCertificateService.update(1L, new GiftCertificate());
+            GiftCertificate expected = new GiftCertificate();
+            assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
         }
-        verify(giftCertificateDao, times(1)).update(id, giftCertificate);
     }
 
     @Test
     void update_InvalidIdAndNullGiven_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.update(-1, null));
+        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.update(0, null));
     }
 
     @Test
-    void update_DaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            doThrow(new DaoException())
-                    .when(giftCertificateDao)
-                    .update(anyLong(), any(GiftCertificate.class));
-        } catch (DaoException ignored) {
-        }
-        assertThrows(ServiceException.class, () -> giftCertificateService.update(1, new GiftCertificate()));
+    void update_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
+        when(giftCertificateDao.findById(anyLong())).thenReturn(Optional.of(new GiftCertificate()));
+        when(giftCertificateDao.update(any(GiftCertificate.class))).thenThrow(new DaoException());
+        LocalDateTime dateTime = LocalDateTime.of(1971, 1, 1, 1, 1);
+        GiftCertificate giftCertificate = GiftCertificate.builder()
+                .name("name")
+                .description("description")
+                .price(new BigDecimal(123))
+                .durationInDays(1)
+                .createDate(dateTime)
+                .lastUpdateDate(dateTime.minusDays(1))
+                .tags(new ArrayList<>())
+                .build();
+        assertThrows(ServiceException.class, () -> giftCertificateService.update(1L, giftCertificate));
     }
 
     @Test
     void delete_ValidIdGiven_Success() throws DaoException {
-        long id = 1;
+        when(giftCertificateDao.delete(anyLong())).thenReturn(new GiftCertificate());
         try {
-            giftCertificateService.delete(id);
+            GiftCertificate actual = giftCertificateService.delete(1L);
+            GiftCertificate expected = new GiftCertificate();
+            assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
         }
-        verify(giftCertificateDao, times(1)).delete(id);
     }
 
     @Test
     void delete_InvalidIdGiven_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.delete(-1));
+        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.delete(0));
     }
 
     @Test
     void delete_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
-        doThrow(new DaoException()).when(giftCertificateDao).delete(anyLong());
-        assertThrows(ServiceException.class, () -> giftCertificateService.delete(1));
+        when(giftCertificateDao.delete(anyLong())).thenThrow(new DaoException());
+        assertThrows(ServiceException.class, () -> giftCertificateService.delete(1L));
     }
 
     @Test
     void findByTagName_ValidTagNameGiven_ShouldReturnList() throws DaoException {
-        when(giftCertificateDao.findByTagName(anyString())).thenReturn(List.of(new GiftCertificate()));
+        List<GiftCertificate> expected = List.of(new GiftCertificate());
+        when(giftCertificateDao.findByTagName(anyList(), anyList(), anyList(), anyInt(), anyInt())).thenReturn(expected);
         try {
-            List<GiftCertificate> actual = giftCertificateService.findByTagName("name");
-            List<GiftCertificate> expected = List.of(new GiftCertificate());
+            List<GiftCertificate> actual =
+                    giftCertificateService.findByTagName(List.of("tag name"), null, null, null, null, 0, 501);
             assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
@@ -226,24 +224,30 @@ class GiftCertificateServiceImplTest {
 
     @Test
     void findByTagName_NullGiven_ShouldThrowIllegalArgumentException() {
-        assertThrows(IllegalArgumentException.class, () -> giftCertificateService.findByTagName(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> giftCertificateService.findByTagName(null, null, null, null, null, 1, 1));
     }
 
     @Test
-    void findByTagName_DaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            when(giftCertificateDao.findByTagName(anyString())).thenThrow(new DaoException());
-        } catch (DaoException ignored) {
-        }
-        assertThrows(ServiceException.class, () -> giftCertificateService.findByTagName("name"));
+    void findByTagName_DaoExceptionThrown_ShouldThrowServiceException() throws DaoException {
+        when(giftCertificateDao.findByTagName(anyList(), anyList(), anyList(), anyInt(), anyInt()))
+                .thenThrow(new DaoException());
+        assertThrows(ServiceException.class,
+                () -> giftCertificateService.findByTagName(List.of("tag name"), null, null, null, null, 1, 1));
     }
 
     @Test
-    void findByTagName_ValidTagNameAndQueryCustomizerGiven_ShouldReturnList() throws DaoException {
-        when(giftCertificateDao.findByTagName(anyString(), any(QueryCustomizer.class))).thenReturn(List.of(new GiftCertificate()));
+    void findByTagName_ValidParametersGiven_ShouldReturnList() throws DaoException {
+        List<GiftCertificate> expected = List.of(new GiftCertificate());
+        when(giftCertificateDao.findByTagName(anyList(), anyList(), anyList(), anyInt(), anyInt())).thenReturn(expected);
         try {
-            List<GiftCertificate> actual = giftCertificateService.findByTagName("name", new QueryCustomizer());
-            List<GiftCertificate> expected = List.of(new GiftCertificate());
+            List<GiftCertificate> actual = giftCertificateService.findByTagName(List.of("tag name"),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    new ArrayList<>(),
+                    0,
+                    501);
             assertEquals(expected, actual);
         } catch (ServiceException e) {
             fail(e);
@@ -251,18 +255,8 @@ class GiftCertificateServiceImplTest {
     }
 
     @Test
-    void findByTagName_NullsGiven_ShouldThrowIllegalArgumentException() {
+    void findByTagName_InvalidParametersGiven_ShouldThrowIllegalArgumentException() {
         assertThrows(IllegalArgumentException.class,
-                () -> giftCertificateService.findByTagName(null, null));
-    }
-
-    @Test
-    void findByTagName_ValidQueryCustomizerGivenDaoExceptionThrown_ShouldThrowServiceException() {
-        try {
-            when(giftCertificateDao.findByTagName(anyString(), any(QueryCustomizer.class))).thenThrow(new DaoException());
-        } catch (DaoException ignored) {
-        }
-        assertThrows(ServiceException.class,
-                () -> giftCertificateService.findByTagName("name", new QueryCustomizer()));
+                () -> giftCertificateService.findByTagName(List.of(""), null, null, null, null, -1, -1));
     }
 }
