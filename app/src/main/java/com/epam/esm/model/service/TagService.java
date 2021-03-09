@@ -44,7 +44,7 @@ public interface TagService {
      * @param limit            maximum count of records to return
      * @return list of found {@link Tag} objects
      * @throws ServiceException         if error occurs while finding {@link Tag} objects
-     * @throws IllegalArgumentException if query customizer is null
+     * @throws IllegalArgumentException if offset or limit are invalid
      */
     List<Tag> findAll(List<String> sortField,
                       List<String> sortType,
@@ -64,5 +64,11 @@ public interface TagService {
      */
     Tag delete(long id) throws ServiceException;
 
+    /**
+     * Find most used tag among users with highest order cost sum.
+     *
+     * @return the tag
+     * @throws ServiceException if error occurs while finding most used {@link Tag}
+     */
     Tag findMostUsedTag() throws ServiceException;
 }

@@ -30,7 +30,7 @@ public interface UserService {
      * @param limit            maximum count of records to return
      * @return list of found {@link User} objects
      * @throws ServiceException         if error occurs while finding {@link User} objects
-     * @throws IllegalArgumentException if query customizer is null
+     * @throws IllegalArgumentException if offset or limit are invalid
      */
     List<User> findAll(List<String> sortField,
                        List<String> sortType,
@@ -47,7 +47,18 @@ public interface UserService {
      * @param limit  maximum count of records to return
      * @return list of found {@link Order} objects
      * @throws ServiceException         if error occurs while finding {@link User} objects
-     * @throws IllegalArgumentException if query customizer is null
+     * @throws IllegalArgumentException if id, offset or limit are invalid
      */
     List<Order> findOrdersOfUser(long id, int offset, int limit) throws ServiceException;
+
+    /**
+     * Make order on gift certificate.
+     *
+     * @param userId            the user id
+     * @param giftCertificateId the gift certificate id
+     * @return the {@link Order}
+     * @throws ServiceException if error occurs while making an order on {@link com.epam.esm.entity.GiftCertificate}
+     *                          for {@link User}
+     */
+    Order makeOrderOnGiftCertificate(long userId, long giftCertificateId) throws ServiceException;
 }

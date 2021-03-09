@@ -44,7 +44,7 @@ public interface GiftCertificateService {
      * @param limit            maximum count of records to return
      * @return list of found {@link GiftCertificate} objects
      * @throws ServiceException         if error occurs while finding {@link GiftCertificate} objects
-     * @throws IllegalArgumentException if query customizer is null
+     * @throws IllegalArgumentException if offset or limit are invalid
      */
     List<GiftCertificate> findAll(List<String> sortField,
                                   List<String> sortType,
@@ -91,7 +91,7 @@ public interface GiftCertificateService {
      * @param limit            maximum count of records to return
      * @return list of found {@link GiftCertificate} objects
      * @throws ServiceException         if error occurs while finding {@link GiftCertificate} objects by tag name
-     * @throws IllegalArgumentException if tag name or query customizer objects are null
+     * @throws IllegalArgumentException if tag name, offset or limit are invalid
      */
     List<GiftCertificate> findByTagName(List<String> tagName,
                                         List<String> sortField,

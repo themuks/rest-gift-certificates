@@ -1,11 +1,14 @@
 package com.epam.esm.model.dao;
 
+import com.epam.esm.model.dao.exception.DaoException;
+import com.epam.esm.model.dao.exception.EntityWithIdNotFoundException;
 import com.epam.esm.util.entity.SearchUnit;
 import com.epam.esm.util.entity.SortUnit;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,38 +19,9 @@ import java.util.Optional;
 public abstract class AbstractDao<T> implements Dao<T> {
     private static final String FROM = "from ";
     private static final String PERCENT = "%";
-    protected final EntityManager entityManager;
+    @PersistenceContext
+    protected EntityManager entityManager;
     private Class<T> clazz;
-
-    public AbstractDao(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
-    protected static <T> List<Order> extractOrderList(List<SortUnit> sortCriteria,
-                                                      CriteriaBuilder criteriaBuilder,
-                                                      Root<T> root) {
-        List<Order> orderList = new ArrayList<>();
-        for (SortUnit sortCriterion : sortCriteria) {
-            Path<Object> objectPath = root.get(sortCriterion.getSortField());
-            if (sortCriterion.isAscending()) {
-                orderList.add(criteriaBuilder.asc(objectPath));
-            } else {
-                orderList.add(criteriaBuilder.desc(objectPath));
-            }
-        }
-        return orderList;
-    }
-
-    protected static <T> List<Predicate> extractPredicates(List<SearchUnit> searchCriteria,
-                                                           CriteriaBuilder criteriaBuilder,
-                                                           Root<T> root) {
-        List<Predicate> predicates = new ArrayList<>();
-        for (SearchUnit searchCriterion : searchCriteria) {
-            predicates.add(criteriaBuilder.like(root.get(searchCriterion.getSearchFieldName()),
-                    PERCENT + searchCriterion.getSearchExpression() + PERCENT));
-        }
-        return predicates;
-    }
 
     public void setClazz(Class<T> clazzToSet) {
         clazz = clazzToSet;
@@ -61,7 +35,8 @@ public abstract class AbstractDao<T> implements Dao<T> {
 
     @Override
     public Optional<T> findById(long id) {
-        return Optional.ofNullable(entityManager.find(clazz, id));
+        T entity = entityManager.find(clazz, id);
+        return Optional.ofNullable(entity);
     }
 
     @Override
@@ -96,9 +71,39 @@ public abstract class AbstractDao<T> implements Dao<T> {
     public T delete(long id) throws DaoException {
         Optional<T> optionalEntity = findById(id);
         T entity = optionalEntity.orElseThrow(() ->
-                new DaoException("message.exception.dao.not_found"));
+                new EntityWithIdNotFoundException(id, "message.exception.dao.not_found"));
         delete(entity);
         return entity;
+    }
+
+    protected static <T> List<Order> extractOrderList(List<SortUnit> sortCriteria,
+                                                      CriteriaBuilder criteriaBuilder,
+                                                      Root<T> root) {
+        List<Order> orderList = new ArrayList<>();
+        if (sortCriteria != null) {
+            for (SortUnit sortCriterion : sortCriteria) {
+                Path<Object> objectPath = root.get(sortCriterion.getSortField());
+                if (sortCriterion.isAscending()) {
+                    orderList.add(criteriaBuilder.asc(objectPath));
+                } else {
+                    orderList.add(criteriaBuilder.desc(objectPath));
+                }
+            }
+        }
+        return orderList;
+    }
+
+    protected static <T> List<Predicate> extractPredicates(List<SearchUnit> searchCriteria,
+                                                           CriteriaBuilder criteriaBuilder,
+                                                           Root<T> root) {
+        List<Predicate> predicates = new ArrayList<>();
+        if (searchCriteria != null) {
+            for (SearchUnit searchCriterion : searchCriteria) {
+                predicates.add(criteriaBuilder.like(root.get(searchCriterion.getSearchFieldName()),
+                        PERCENT + searchCriterion.getSearchExpression() + PERCENT));
+            }
+        }
+        return predicates;
     }
 
     private void delete(T entity) {

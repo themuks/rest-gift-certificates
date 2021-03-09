@@ -1,7 +1,10 @@
 package com.epam.esm.entity;
 
-import lombok.*;
-import org.springframework.hateoas.RepresentationModel;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -14,14 +17,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "gift_certificate")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GiftCertificate extends RepresentationModel<GiftCertificate> implements Serializable {
+public class GiftCertificate implements Serializable {
     @Min(1)
     @Id
     @GeneratedValue
@@ -35,14 +37,16 @@ public class GiftCertificate extends RepresentationModel<GiftCertificate> implem
     @Positive
     @Column(name = "duration_in_days")
     private Integer durationInDays;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @PastOrPresent
     @Column(name = "create_date")
     private LocalDateTime createDate;
     @PastOrPresent
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @Column(name = "last_update_date")
     private LocalDateTime lastUpdateDate;
     @Valid
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "gift_certificate_has_tag",
             joinColumns = {@JoinColumn(name = "gift_certificate_id")},
             inverseJoinColumns = {@JoinColumn(name = "tag_id")})

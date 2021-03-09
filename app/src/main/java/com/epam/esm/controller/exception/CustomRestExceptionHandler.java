@@ -45,8 +45,8 @@ public class CustomRestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(new ApiError(ex.getLocalizedMessage(), errorCode), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ServerInternalErrorException.class)
-    protected ResponseEntity<Object> serverInternalErrorException(ServerInternalErrorException ex) {
+    @ExceptionHandler(ControllerException.class)
+    protected ResponseEntity<Object> serverInternalErrorException(ControllerException ex) {
         log.error("Server internal error occurred", ex);
         String errorCode = HttpStatus.BAD_REQUEST.value() + ex.getEntityCode();
         return new ResponseEntity<>(new ApiError(ex.getLocalizedMessage(), errorCode), HttpStatus.BAD_REQUEST);

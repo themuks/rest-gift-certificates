@@ -1,8 +1,10 @@
 package com.epam.esm.model.service.impl;
 
 import com.epam.esm.entity.GiftCertificate;
-import com.epam.esm.model.dao.DaoException;
+import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.GiftCertificateDao;
+import com.epam.esm.model.dao.TagDao;
+import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.GiftCertificateService;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.validator.*;
@@ -15,17 +17,20 @@ import org.springframework.validation.DataBinder;
 import org.springframework.validation.Validator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
+    private final TagDao tagDao;
     private final Validator giftCertificateValidator = new GiftCertificateValidator(new TagValidator());
     private final Validator proxyGiftCertificateValidator = new ProxyGiftCertificateValidator(new TagValidator());
 
-    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao) {
+    public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao, TagDao tagDao) {
         this.giftCertificateDao = giftCertificateDao;
+        this.tagDao = tagDao;
     }
 
     @Override
@@ -41,6 +46,31 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid field '"
                     + bindingResult.getFieldError().getField() + "'");
         }
+        List<Tag> tags = giftCertificate.getTags();
+        if (tags != null) {
+            List<Tag> newTags = new ArrayList<>();
+            for (Tag tag : tags) {
+                try {
+                    Long id = tag.getId();
+                    if (id != null) {
+                        Optional<Tag> tagOptional = tagDao.findById(id);
+                        if (tagOptional.isEmpty()) {
+                            tag.setId(null);
+                            newTags.add(tagDao.add(tag));
+                        } else {
+                            newTags.add(tagOptional.get());
+                        }
+                    } else {
+                        newTags.add(tag);
+                    }
+                } catch (DaoException e) {
+                    throw new ServiceException(e.getLocalizedMessage(), e);
+                }
+            }
+            giftCertificate.setTags(newTags);
+        }
+        giftCertificate.setCreateDate(LocalDateTime.now());
+        giftCertificate.setLastUpdateDate(LocalDateTime.now());
         try {
             return giftCertificateDao.add(giftCertificate);
         } catch (DaoException e) {
@@ -105,13 +135,14 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             Optional.ofNullable(patch.getCreateDate()).ifPresent(giftCertificate::setCreateDate);
             Optional.ofNullable(patch.getLastUpdateDate()).ifPresentOrElse(giftCertificate::setLastUpdateDate,
                     () -> giftCertificate.setLastUpdateDate(LocalDateTime.now()));
+            Optional.ofNullable(patch.getTags()).ifPresent(giftCertificate::setTags);
             try {
                 return giftCertificateDao.update(giftCertificate);
             } catch (DaoException e) {
                 throw new ServiceException(e.getLocalizedMessage(), e);
             }
         } else {
-            throw new ServiceException("Gift certificate with such id = {" + id + "} is not exist");
+            throw new ServiceException("Gift certificate with such id = (" + id + ") is not exist");
         }
     }
 

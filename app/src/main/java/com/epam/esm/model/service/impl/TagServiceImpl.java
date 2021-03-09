@@ -1,8 +1,8 @@
 package com.epam.esm.model.service.impl;
 
 import com.epam.esm.entity.Tag;
-import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.TagDao;
+import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import com.epam.esm.model.validator.EntityValidator;

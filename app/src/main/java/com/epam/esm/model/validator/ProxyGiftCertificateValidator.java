@@ -7,7 +7,7 @@ import org.springframework.validation.ValidationUtils;
 import org.springframework.validation.Validator;
 
 /**
- * GiftCertificateValidator is a Validator for {@link GiftCertificate} objects.
+ * ProxyGiftCertificateValidator is a Validator for {@link GiftCertificate} objects.
  * It checks if fields are null, and if they aren't null performs validation for every field.
  * Performs additional check that name is not null.
  * Result of validation will be stored in {@link Errors} object.

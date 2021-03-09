@@ -2,13 +2,12 @@ package com.epam.esm.model.dao.impl;
 
 import com.epam.esm.entity.Tag;
 import com.epam.esm.model.dao.AbstractDao;
-import com.epam.esm.model.dao.DaoException;
 import com.epam.esm.model.dao.TagDao;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.epam.esm.model.dao.exception.DaoException;
+import com.epam.esm.model.dao.exception.EntityWithIdNotFoundException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import java.math.BigInteger;
 import java.util.Optional;
 
@@ -39,19 +38,20 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
             LIMIT 1
             """;
 
-    @Autowired
-    public TagDaoImpl(EntityManager entityManager) {
-        super(entityManager);
+    public TagDaoImpl() {
         setClazz(Tag.class);
     }
 
     @Override
     public Tag findMostUsedTag() throws DaoException {
-        Object[] result = (Object[]) entityManager.createNativeQuery(FIND_USER_WITH_HIGHEST_ORDER_COST).getSingleResult();
+        Object[] result = (Object[]) entityManager.createNativeQuery(FIND_USER_WITH_HIGHEST_ORDER_COST)
+                .getSingleResult();
         long userId = ((BigInteger) result[ZERO]).longValue();
-        result = (Object[]) entityManager.createNativeQuery(FIND_MOST_USED_TAG_BY_USER_ID_QUERY).setParameter(USER_ID, userId).getSingleResult();
+        result = (Object[]) entityManager.createNativeQuery(FIND_MOST_USED_TAG_BY_USER_ID_QUERY)
+                .setParameter(USER_ID, userId).getSingleResult();
         long mostUsedTagId = ((BigInteger) result[ZERO]).longValue();
         Optional<Tag> tagOptional = findById(mostUsedTagId);
-        return tagOptional.orElseThrow(() -> new DaoException("message.exception.dao.not_found"));
+        return tagOptional.orElseThrow(() -> new EntityWithIdNotFoundException(mostUsedTagId,
+                "message.exception.dao.not_found"));
     }
 }

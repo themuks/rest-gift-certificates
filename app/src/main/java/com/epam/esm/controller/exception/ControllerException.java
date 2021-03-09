@@ -8,10 +8,10 @@ import lombok.Setter;
  */
 @Getter
 @Setter
-public class ServerInternalErrorException extends RuntimeException {
+public class ControllerException extends RuntimeException {
     private String entityCode;
 
-    public ServerInternalErrorException(String message, String entityCode) {
+    public ControllerException(String message, String entityCode) {
         super(message);
         this.entityCode = entityCode;
     }

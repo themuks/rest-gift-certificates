@@ -1,7 +1,10 @@
 package com.epam.esm.entity;
 
-import lombok.*;
-import org.springframework.hateoas.RepresentationModel;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.Valid;
@@ -13,14 +16,13 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "order")
+@Table(name = "`order`")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Order extends RepresentationModel<Order> implements Serializable {
+public class Order implements Serializable {
     @Min(1)
     @Id
     @GeneratedValue
@@ -38,6 +40,7 @@ public class Order extends RepresentationModel<Order> implements Serializable {
     @NotNull
     @Positive
     private BigDecimal cost;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     @NotNull
     @PastOrPresent
     @Column(name = "order_date")

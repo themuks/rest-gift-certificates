@@ -9,7 +9,6 @@ import com.epam.esm.util.entity.SortUnit;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
 import javax.persistence.criteria.*;
 import java.util.List;
 
@@ -19,8 +18,7 @@ public class GiftCertificateDaoImpl extends AbstractDao<GiftCertificate> impleme
     private static final String TAGS = "tags";
     private static final String NAME = "name";
 
-    public GiftCertificateDaoImpl(EntityManager entityManager) {
-        super(entityManager);
+    public GiftCertificateDaoImpl() {
         setClazz(GiftCertificate.class);
     }
 

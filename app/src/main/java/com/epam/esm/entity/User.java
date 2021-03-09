@@ -1,7 +1,9 @@
 package com.epam.esm.entity;
 
-import lombok.*;
-import org.springframework.hateoas.RepresentationModel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -11,14 +13,13 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
 import java.io.Serializable;
 
-@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "user")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User extends RepresentationModel<User> implements Serializable {
+public class User implements Serializable {
     @Min(1)
     @Id
     @GeneratedValue

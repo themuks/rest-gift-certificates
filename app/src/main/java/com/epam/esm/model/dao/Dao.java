@@ -1,5 +1,6 @@
 package com.epam.esm.model.dao;
 
+import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.util.entity.SearchUnit;
 import com.epam.esm.util.entity.SortUnit;
 

@@ -1,13 +1,14 @@
 package com.epam.esm.model.dao;
 
 import com.epam.esm.entity.GiftCertificate;
+import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.util.entity.SearchUnit;
 import com.epam.esm.util.entity.SortUnit;
 
 import java.util.List;
 
 /**
- * The interface Gift certificate dao extended from {@code BaseDao<T>} interface.
+ * The interface Gift certificate dao extended from {@code Dao<T>} interface.
  * Provides additional methods to work with {@code GiftCertificate} objects from data source.
  *
  * @see GiftCertificate
