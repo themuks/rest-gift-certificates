@@ -26,7 +26,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
     private final TagDao tagDao;
     private final Validator giftCertificateValidator = new GiftCertificateValidator(new TagValidator());
-    private final Validator proxyGiftCertificateValidator = new ProxyGiftCertificateValidator(new TagValidator());
+    private final Validator proxyGiftCertificateValidator = new ProxyGiftCertificateValidator(new ProxyTagValidator());
 
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao, TagDao tagDao) {
         this.giftCertificateDao = giftCertificateDao;
@@ -68,9 +68,12 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
                 }
             }
             giftCertificate.setTags(newTags);
+        } else {
+            giftCertificate.setTags(new ArrayList<>());
         }
         giftCertificate.setCreateDate(LocalDateTime.now());
         giftCertificate.setLastUpdateDate(LocalDateTime.now());
+        giftCertificate.setId(null);
         try {
             return giftCertificateDao.add(giftCertificate);
         } catch (DaoException e) {
@@ -125,6 +128,15 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             throw new IllegalArgumentException("The supplied [GiftCertificate] has invalid field '"
                     + bindingResult.getFieldError().getField() + "'");
         }
+        List<Tag> newTags = new ArrayList<>();
+        Optional.ofNullable(patch.getTags()).ifPresent(tgs -> {
+            for (Tag tag : tgs) {
+                try {
+                    tagDao.findById(tag.getId()).ifPresent(newTags::add);
+                } catch (DaoException ignored) {
+                }
+            }
+        });
         Optional<GiftCertificate> optionalGiftCertificate = findById(id);
         if (optionalGiftCertificate.isPresent()) {
             GiftCertificate giftCertificate = optionalGiftCertificate.get();
@@ -135,7 +147,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
             Optional.ofNullable(patch.getCreateDate()).ifPresent(giftCertificate::setCreateDate);
             Optional.ofNullable(patch.getLastUpdateDate()).ifPresentOrElse(giftCertificate::setLastUpdateDate,
                     () -> giftCertificate.setLastUpdateDate(LocalDateTime.now()));
-            Optional.ofNullable(patch.getTags()).ifPresent(giftCertificate::setTags);
+            giftCertificate.setTags(newTags);
             try {
                 return giftCertificateDao.update(giftCertificate);
             } catch (DaoException e) {

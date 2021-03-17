@@ -15,14 +15,14 @@ import java.util.Optional;
 @Transactional
 public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
     private static final String FIND_USER_WITH_HIGHEST_ORDER_COST = """
-                SELECT id,
-                       (SELECT sum(o.cost)
-                        FROM user AS u
-                                 JOIN `order` o on u.id = o.user_id
-                        WHERE u.id = user.id) as total
-                FROM user
-                ORDER BY total DESC
-                LIMIT 1
+            SELECT id,
+                   (SELECT sum(o.cost)
+                    FROM user AS u
+                             JOIN `order` o on u.id = o.user_id
+                    WHERE u.id = user.id) as total
+            FROM user
+            ORDER BY total DESC
+            LIMIT 1
             """;
     private static final String USER_ID = "user_id";
     private static final int ZERO = 0;
@@ -51,7 +51,7 @@ public class TagDaoImpl extends AbstractDao<Tag> implements TagDao {
                 .setParameter(USER_ID, userId).getSingleResult();
         long mostUsedTagId = ((BigInteger) result[ZERO]).longValue();
         Optional<Tag> tagOptional = findById(mostUsedTagId);
-        return tagOptional.orElseThrow(() -> new EntityWithIdNotFoundException(mostUsedTagId,
-                "message.exception.dao.not_found"));
+        return tagOptional.orElseThrow(() ->
+                new EntityWithIdNotFoundException(mostUsedTagId, "message.exception.dao.not_found"));
     }
 }

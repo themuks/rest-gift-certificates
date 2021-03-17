@@ -28,7 +28,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/gift-certificates")
+@RequestMapping("v1/gift-certificates")
 @Validated
 public class GiftCertificateController {
     private static final String GIFT_CERTIFICATE_ENTITY_CODE = "01";
@@ -159,6 +159,8 @@ public class GiftCertificateController {
         Link self = linkTo(methodOn(GiftCertificateController.class).update(id, patch)).withSelfRel();
         Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
         try {
+            giftCertificateService.findById(id).orElseThrow(() ->
+                    new EntityNotFoundException(id, GIFT_CERTIFICATE_ENTITY_CODE));
             GiftCertificate updatedGiftCertificate = giftCertificateService.update(id, patch);
             return EntityModel.of(updatedGiftCertificate, self, delete);
         } catch (ServiceException e) {
@@ -178,6 +180,8 @@ public class GiftCertificateController {
         Link self = linkTo(methodOn(GiftCertificateController.class).delete(id)).withSelfRel();
         Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
         try {
+            giftCertificateService.findById(id).orElseThrow(() ->
+                    new EntityNotFoundException(id, GIFT_CERTIFICATE_ENTITY_CODE));
             GiftCertificate deletedGiftCertificate = giftCertificateService.delete(id);
             return EntityModel.of(deletedGiftCertificate, self, update);
         } catch (ServiceException e) {

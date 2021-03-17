@@ -16,9 +16,9 @@ import java.util.Optional;
 @Transactional
 public class UserDaoImpl extends AbstractDao<User> implements UserDao {
     private static final String FIND_ORDERS_OF_USER_QUERY = """
-                select o 
-                from Order o 
-                where o.user.id = :id
+            select o 
+            from Order o 
+            where o.user.id = :id
             """;
     private static final String ID = "id";
 

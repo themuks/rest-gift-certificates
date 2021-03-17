@@ -2,6 +2,7 @@ package com.epam.esm.controller;
 
 import com.epam.esm.controller.exception.ControllerException;
 import com.epam.esm.controller.exception.EntityNotFoundException;
+import com.epam.esm.entity.GiftCertificate;
 import com.epam.esm.entity.Order;
 import com.epam.esm.entity.User;
 import com.epam.esm.entity.UserDto;
@@ -12,9 +13,12 @@ import org.modelmapper.ModelMapper;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +30,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/users")
+@RequestMapping("v1/users")
 @Validated
 public class UserController {
     private static final String USER_ENTITY_CODE = "03";
@@ -112,14 +116,15 @@ public class UserController {
         }
     }
 
-    @PostMapping("/{userId}/make-order/{giftCertificateId}")
+    @PostMapping("/{userId}")
+    @ResponseStatus(HttpStatus.CREATED)
     public EntityModel<Order> makeOrderOnGiftCertificate(@PathVariable long userId,
-                                                         @PathVariable long giftCertificateId) {
-        Link self =
-                linkTo(methodOn(UserController.class).makeOrderOnGiftCertificate(userId, giftCertificateId)).withSelfRel();
+                                                         @Valid @NotNull @RequestBody GiftCertificate giftCertificate) {
+        Link self = linkTo(methodOn(UserController.class).makeOrderOnGiftCertificate(userId, giftCertificate))
+                        .withSelfRel();
         try {
-            Order order = userService.makeOrderOnGiftCertificate(userId, giftCertificateId);
-            return EntityModel.of(order);
+            Order order = userService.makeOrderOnGiftCertificate(userId, giftCertificate.getId());
+            return EntityModel.of(order, self);
         } catch (ServiceException e) {
             throw new ControllerException(e.getLocalizedMessage(), USER_ENTITY_CODE);
         }

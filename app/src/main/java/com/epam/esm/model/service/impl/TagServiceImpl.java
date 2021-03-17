@@ -6,8 +6,8 @@ import com.epam.esm.model.dao.exception.DaoException;
 import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.TagService;
 import com.epam.esm.model.validator.EntityValidator;
+import com.epam.esm.model.validator.ProxyTagValidator;
 import com.epam.esm.model.validator.QueryParameterValidator;
-import com.epam.esm.model.validator.TagValidator;
 import com.epam.esm.util.CriteriaConstructor;
 import com.epam.esm.util.entity.SearchUnit;
 import com.epam.esm.util.entity.SortUnit;
@@ -22,7 +22,7 @@ import java.util.Optional;
 @Service
 public class TagServiceImpl implements TagService {
     private final TagDao tagDao;
-    private final Validator tagValidator = new TagValidator();
+    private final Validator tagValidator = new ProxyTagValidator();
 
     public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;
@@ -42,6 +42,7 @@ public class TagServiceImpl implements TagService {
             throw new IllegalArgumentException("The supplied [Tag] has invalid field '"
                     + bindingResult.getFieldError().getField() + "'");
         }
+        tag.setId(null);
         try {
             return tagDao.add(tag);
         } catch (DaoException e) {

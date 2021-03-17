@@ -83,22 +83,20 @@ public class UserServiceImpl implements UserService {
         if (!EntityValidator.isIdValid(userId) || !EntityValidator.isIdValid(giftCertificateId)) {
             throw new IllegalArgumentException("Id must be positive");
         }
-        Optional<GiftCertificate> optionalGiftCertificate;
+        User user;
         try {
-            optionalGiftCertificate = giftCertificateDao.findById(giftCertificateId);
+            user = userDao.findById(userId).orElseThrow(() ->
+                    new ServiceException("User with id = (" + userId + ") doesn't exist"));
         } catch (DaoException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
-        GiftCertificate giftCertificate = optionalGiftCertificate.orElseThrow(() ->
-                new ServiceException("Gift certificate with id = (" + giftCertificateId + ") doesn't exist"));
-        Optional<User> optionalUser;
+        GiftCertificate giftCertificate;
         try {
-            optionalUser = userDao.findById(userId);
+            giftCertificate = giftCertificateDao.findById(giftCertificateId).orElseThrow(() ->
+                    new ServiceException("Gift certificate with id = (" + giftCertificateId + ") doesn't exist"));
         } catch (DaoException e) {
             throw new ServiceException(e.getLocalizedMessage(), e);
         }
-        User user = optionalUser.orElseThrow(() ->
-                new ServiceException("User with id = (" + giftCertificateId + ") doesn't exist"));
         Order order = Order.builder()
                 .orderDate(LocalDateTime.now())
                 .user(user)

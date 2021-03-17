@@ -27,7 +27,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("v1/tags")
 public class TagController {
     private static final String TAG_ENTITY_CODE = "02";
     private static final String DELETE = "delete";
@@ -124,6 +124,7 @@ public class TagController {
     public EntityModel<Tag> delete(@PathVariable long id) {
         Link self = linkTo(methodOn(TagController.class).delete(id)).withSelfRel();
         try {
+            tagService.findById(id).orElseThrow(() -> new EntityNotFoundException(id, TAG_ENTITY_CODE));
             Tag deletedTag = tagService.delete(id);
             return EntityModel.of(deletedTag, self);
         } catch (ServiceException e) {
@@ -135,8 +136,9 @@ public class TagController {
      * Find most used tag among users with highest order cost sum.
      *
      * @return the tag
+     * @throws ControllerException if error occurs while finding most used {@link Tag}
      */
-    @GetMapping("/popular-tag")
+    @GetMapping("/popular")
     public EntityModel<Tag> findMostUsedTag() {
         Link self = linkTo(methodOn(TagController.class).findMostUsedTag()).withSelfRel();
         try {
