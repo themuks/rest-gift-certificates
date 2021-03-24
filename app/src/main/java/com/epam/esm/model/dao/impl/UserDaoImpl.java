@@ -9,6 +9,7 @@ import com.epam.esm.model.dao.exception.EntityWithIdNotFoundException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.NoResultException;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
             where o.user.id = :id
             """;
     private static final String ID = "id";
+    private static final String FIND_USER_BY_EMAIL_QUERY = "select u from User u where u.email = :email";
 
     public UserDaoImpl() {
         setClazz(User.class);
@@ -35,5 +37,18 @@ public class UserDaoImpl extends AbstractDao<User> implements UserDao {
                 .setFirstResult(offset)
                 .setMaxResults(limit)
                 .getResultList();
+    }
+
+    @Override
+    public Optional<User> findByEmail(String email) {
+        Optional<User> optionalUser;
+        try {
+            optionalUser = Optional.of(entityManager.createQuery(FIND_USER_BY_EMAIL_QUERY, User.class)
+                    .setParameter("email", email)
+                    .getSingleResult());
+        } catch (NoResultException e) {
+            optionalUser = Optional.empty();
+        }
+        return optionalUser;
     }
 }

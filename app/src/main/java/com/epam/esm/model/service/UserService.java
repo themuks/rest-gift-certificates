@@ -61,4 +61,26 @@ public interface UserService {
      *                          for {@link User}
      */
     Order makeOrderOnGiftCertificate(long userId, long giftCertificateId) throws ServiceException;
+
+    /**
+     * Find user by email.
+     *
+     * @param email email to search user by
+     * @return found optional of {@link User} object
+     * @throws ServiceException if error occurs while finding {@link User} object
+     */
+    Optional<User> findByEmail(String email) throws ServiceException;
+
+    /**
+     * Adds {@link User} object to repository.
+     *
+     * @param email email of new user
+     * @param password password of new user
+     * @param name name of new user
+     * @param surname surname of new user
+     * @return true, if successfully registered otherwise false
+     * @throws ServiceException         if error occurs while adding {@link User} to repository
+     * @throws IllegalArgumentException if provided object is null or doesn't pass validation
+     */
+    boolean register(String email, String password, String name, String surname) throws ServiceException;
 }

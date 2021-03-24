@@ -12,9 +12,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.security.PermitAll;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
@@ -28,9 +30,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  */
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("v1/gift-certificates")
+@RequestMapping("api/v1/gift-certificates")
 @Validated
-public class GiftCertificateController {
+public class GiftCertificateControllerV1 {
     private static final String GIFT_CERTIFICATE_ENTITY_CODE = "01";
     private static final String UPDATE = "update";
     private static final String DELETE = "delete";
@@ -52,6 +54,7 @@ public class GiftCertificateController {
      * @throws ControllerException if error occurs while finding all {@link GiftCertificate} objects
      */
     @GetMapping()
+    @PermitAll
     public CollectionModel<GiftCertificateDto> findAll(@RequestParam Integer offset,
                                                        @RequestParam Integer limit,
                                                        @RequestParam(required = false) List<String> tagName,
@@ -61,37 +64,37 @@ public class GiftCertificateController {
                                                        @RequestParam(required = false) List<String> searchExpression) {
         try {
             if (tagName != null) {
-                Link link = linkTo(methodOn(GiftCertificateController.class)
+                Link link = linkTo(methodOn(GiftCertificateControllerV1.class)
                         .findAll(offset, limit, tagName, sortField, sortType, searchField, searchExpression))
                         .withSelfRel();
                 List<GiftCertificateDto> giftCertificates = giftCertificateService.findByTagName(tagName,
                         sortField, sortType, searchField, searchExpression, offset, limit)
                         .stream()
-                        .map(this::convertToDto)
+                        .map(this::convertGiftCertificateToDto)
                         .collect(Collectors.toList());
                 for (GiftCertificateDto giftCertificateDto : giftCertificates) {
                     Long id = giftCertificateDto.getId();
-                    Link self = linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel();
-                    Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(
+                    Link self = linkTo(methodOn(GiftCertificateControllerV1.class).findById(id)).withSelfRel();
+                    Link update = linkTo(methodOn(GiftCertificateControllerV1.class).update(id, null)).withRel(
                             UPDATE);
-                    Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
+                    Link delete = linkTo(methodOn(GiftCertificateControllerV1.class).delete(id)).withRel(DELETE);
                     giftCertificateDto.add(self, update, delete);
                 }
                 return CollectionModel.of(giftCertificates, link);
             }
-            Link link = linkTo(methodOn(GiftCertificateController.class)
+            Link link = linkTo(methodOn(GiftCertificateControllerV1.class)
                     .findAll(offset, limit, null, sortField, sortType, searchField, searchExpression))
                     .withSelfRel();
             List<GiftCertificateDto> giftCertificates = giftCertificateService.findAll(sortField, sortType, searchField,
                     searchExpression, offset, limit)
                     .stream()
-                    .map(this::convertToDto)
+                    .map(this::convertGiftCertificateToDto)
                     .collect(Collectors.toList());
             for (GiftCertificateDto giftCertificateDto : giftCertificates) {
                 Long id = giftCertificateDto.getId();
-                Link self = linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel();
-                Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
-                Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
+                Link self = linkTo(methodOn(GiftCertificateControllerV1.class).findById(id)).withSelfRel();
+                Link update = linkTo(methodOn(GiftCertificateControllerV1.class).update(id, null)).withRel(UPDATE);
+                Link delete = linkTo(methodOn(GiftCertificateControllerV1.class).delete(id)).withRel(DELETE);
                 giftCertificateDto.add(self, update, delete);
             }
             return CollectionModel.of(giftCertificates, link);
@@ -108,10 +111,11 @@ public class GiftCertificateController {
      * @throws ControllerException if error occurs while finding {@link GiftCertificate} objects by id
      */
     @GetMapping("/{id}")
+    @PermitAll
     public EntityModel<GiftCertificate> findById(@PathVariable long id) {
-        Link self = linkTo(methodOn(GiftCertificateController.class).findById(id)).withSelfRel();
-        Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
-        Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
+        Link self = linkTo(methodOn(GiftCertificateControllerV1.class).findById(id)).withSelfRel();
+        Link update = linkTo(methodOn(GiftCertificateControllerV1.class).update(id, null)).withRel(UPDATE);
+        Link delete = linkTo(methodOn(GiftCertificateControllerV1.class).delete(id)).withRel(DELETE);
         try {
             GiftCertificate giftCertificate = giftCertificateService.findById(id).orElseThrow(
                     () -> new EntityNotFoundException(id, GIFT_CERTIFICATE_ENTITY_CODE));
@@ -130,13 +134,14 @@ public class GiftCertificateController {
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping()
+    @PreAuthorize("hasAuthority('all:write')")
     public EntityModel<GiftCertificate> add(@Valid @NotNull @RequestBody GiftCertificate giftCertificate) {
-        Link self = linkTo(methodOn(GiftCertificateController.class).add(giftCertificate)).withSelfRel();
+        Link self = linkTo(methodOn(GiftCertificateControllerV1.class).add(giftCertificate)).withSelfRel();
         try {
             GiftCertificate addedEntity = giftCertificateService.add(giftCertificate);
-            Link update = linkTo(methodOn(GiftCertificateController.class).update(giftCertificate.getId(), null))
+            Link update = linkTo(methodOn(GiftCertificateControllerV1.class).update(giftCertificate.getId(), null))
                     .withRel(UPDATE);
-            Link delete = linkTo(methodOn(GiftCertificateController.class).delete(giftCertificate.getId()))
+            Link delete = linkTo(methodOn(GiftCertificateControllerV1.class).delete(giftCertificate.getId()))
                     .withRel(DELETE);
             return EntityModel.of(addedEntity, self, update, delete);
         } catch (ServiceException e) {
@@ -154,10 +159,11 @@ public class GiftCertificateController {
      * @throws ControllerException if error occurs while updating {@link GiftCertificate} object
      */
     @PatchMapping("/{id}")
+    @PreAuthorize("hasAuthority('all:write')")
     public EntityModel<GiftCertificate> update(@PathVariable long id,
                                                @Valid @NotNull @RequestBody GiftCertificate patch) {
-        Link self = linkTo(methodOn(GiftCertificateController.class).update(id, patch)).withSelfRel();
-        Link delete = linkTo(methodOn(GiftCertificateController.class).delete(id)).withRel(DELETE);
+        Link self = linkTo(methodOn(GiftCertificateControllerV1.class).update(id, patch)).withSelfRel();
+        Link delete = linkTo(methodOn(GiftCertificateControllerV1.class).delete(id)).withRel(DELETE);
         try {
             giftCertificateService.findById(id).orElseThrow(() ->
                     new EntityNotFoundException(id, GIFT_CERTIFICATE_ENTITY_CODE));
@@ -176,9 +182,10 @@ public class GiftCertificateController {
      * @throws ControllerException if error occurs while deleting {@link GiftCertificate} object
      */
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('all:write')")
     public EntityModel<GiftCertificate> delete(@PathVariable long id) {
-        Link self = linkTo(methodOn(GiftCertificateController.class).delete(id)).withSelfRel();
-        Link update = linkTo(methodOn(GiftCertificateController.class).update(id, null)).withRel(UPDATE);
+        Link self = linkTo(methodOn(GiftCertificateControllerV1.class).delete(id)).withSelfRel();
+        Link update = linkTo(methodOn(GiftCertificateControllerV1.class).update(id, null)).withRel(UPDATE);
         try {
             giftCertificateService.findById(id).orElseThrow(() ->
                     new EntityNotFoundException(id, GIFT_CERTIFICATE_ENTITY_CODE));
@@ -189,7 +196,7 @@ public class GiftCertificateController {
         }
     }
 
-    private GiftCertificateDto convertToDto(GiftCertificate giftCertificate) {
+    private GiftCertificateDto convertGiftCertificateToDto(GiftCertificate giftCertificate) {
         return modelMapper.map(giftCertificate, GiftCertificateDto.class);
     }
 }

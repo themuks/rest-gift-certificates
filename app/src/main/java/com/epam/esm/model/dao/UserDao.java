@@ -5,6 +5,7 @@ import com.epam.esm.entity.User;
 import com.epam.esm.model.dao.exception.DaoException;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The interface User dao extended from {@code Dao<T>} interface.
@@ -24,4 +25,13 @@ public interface UserDao extends Dao<User> {
      * @throws DaoException if error occurs while finding {@link User} objects
      */
     List<Order> findOrdersOfUser(long id, int offset, int limit) throws DaoException;
+
+    /**
+     * Find user by email.
+     *
+     * @param email email to search user by
+     * @return found optional of {@link User} object
+     * @throws DaoException if error occurs while finding {@link User} object
+     */
+    Optional<User> findByEmail(String email) throws DaoException;
 }

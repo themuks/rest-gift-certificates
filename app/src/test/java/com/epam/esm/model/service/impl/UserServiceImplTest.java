@@ -36,7 +36,7 @@ class UserServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        userService = new UserServiceImpl(userDao, orderDao, giftCertificateDao);
+        userService = new UserServiceImpl(userDao, orderDao, giftCertificateDao, passwordEncoder);
     }
 
     @Test
