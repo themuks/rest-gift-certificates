@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.controller.exception.ApiError;
 import com.epam.esm.controller.exception.ControllerException;
 import com.epam.esm.entity.AuthenticationRequestDto;
 import com.epam.esm.entity.User;
@@ -7,7 +8,6 @@ import com.epam.esm.model.service.ServiceException;
 import com.epam.esm.model.service.UserService;
 import com.epam.esm.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +32,7 @@ public class AuthenticationControllerV1 {
     private static final String EMAIL = "email";
     private static final String TOKEN = "token";
     private static final String ROLE = "role";
+    private static final String ID = "id";
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final JwtTokenProvider jwtTokenProvider;
@@ -47,12 +48,15 @@ public class AuthenticationControllerV1 {
                     new UsernameNotFoundException("User doesn't exist"));
             String token = jwtTokenProvider.createToken(request.getEmail(), user.getRole().name());
             Map<Object, Object> response = new HashMap<>();
+            response.put(ID, user.getId());
             response.put(EMAIL, email);
             response.put(ROLE, user.getRole());
             response.put(TOKEN, token);
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
-            return new ResponseEntity<>("Invalid email/password combination", HttpStatus.FORBIDDEN);
+            ApiError result = new ApiError("Invalid email/password combination",
+                    "400" + USER_ENTITY_CODE);
+            return ResponseEntity.badRequest().body(result);
         } catch (ServiceException e) {
             throw new ControllerException(e.getLocalizedMessage(), USER_ENTITY_CODE);
         }

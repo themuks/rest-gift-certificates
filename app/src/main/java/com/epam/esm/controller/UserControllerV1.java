@@ -1,5 +1,6 @@
 package com.epam.esm.controller;
 
+import com.epam.esm.controller.exception.ApiError;
 import com.epam.esm.controller.exception.ControllerException;
 import com.epam.esm.controller.exception.EntityNotFoundException;
 import com.epam.esm.entity.*;
@@ -12,7 +13,9 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,7 @@ import javax.annotation.security.PermitAll;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
@@ -35,7 +39,6 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class UserControllerV1 {
     private static final String USER_ENTITY_CODE = "03";
     private static final String ORDER_ENTITY_CODE = "04";
-    private static final String USER_NOT_CREATED = "User with such email is already registered";
     private final UserService userService;
     private final ModelMapper modelMapper;
 
@@ -101,27 +104,39 @@ public class UserControllerV1 {
     /**
      * Finds {@link User} orders.
      *
-     * @param id     to search by
+     * @param userId to search by
      * @param offset count of records to skip
      * @param limit  maximum count of records to return
      * @return found {@link User} orders
      * @throws ControllerException if error occurs while finding {@link User} orders
      */
-    @GetMapping("/{id}/orders")
+    @GetMapping("/{userId}/orders")
     @PreAuthorize("hasAuthority('all:read')")
-    public CollectionModel<Order> findOrdersOfUser(@PathVariable long id,
-                                                   @RequestParam Integer offset,
-                                                   @RequestParam Integer limit) {
-        Link self = linkTo(methodOn(UserControllerV1.class).findOrdersOfUser(id, offset, limit)).withSelfRel();
+    public CollectionModel<OrderDto> findOrdersOfUser(@PathVariable long userId,
+                                                      @RequestParam Integer offset,
+                                                      @RequestParam Integer limit) {
+        Link self = linkTo(methodOn(UserControllerV1.class).findOrdersOfUser(userId, offset, limit)).withSelfRel();
         try {
-            List<Order> ordersOfUser = userService.findOrdersOfUser(id, offset, limit);
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Optional<User> userByEmailOptional = userService.findByEmail(email);
+            if (userByEmailOptional.isPresent()) {
+                User user = userByEmailOptional.get();
+                if (userId != user.getId() && !user.getRole().equals(Role.ADMIN)) {
+                    throw new AccessDeniedException("Access denied");
+                }
+            } else {
+                throw new ControllerException("User with id = (" + userId + ") doesn't exist", ORDER_ENTITY_CODE);
+            }
+            List<OrderDto> ordersOfUser = userService.findOrdersOfUser(userId, offset, limit).stream()
+                    .map(this::convertOrderToDto)
+                    .collect(Collectors.toList());
             return CollectionModel.of(ordersOfUser, self);
         } catch (ServiceException e) {
-            throw new ControllerException(e.getLocalizedMessage(), USER_ENTITY_CODE);
+            throw new ControllerException(e.getLocalizedMessage(), ORDER_ENTITY_CODE);
         }
     }
 
-    @PostMapping("/{userId}")
+    @PostMapping("/{userId}/orders")
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("hasAuthority('order:create') or hasAuthority('all:write')")
     public EntityModel<OrderDto> makeOrderOnGiftCertificate(@PathVariable long userId,
@@ -129,6 +144,16 @@ public class UserControllerV1 {
         Link self = linkTo(methodOn(UserControllerV1.class).makeOrderOnGiftCertificate(userId, giftCertificate))
                 .withSelfRel();
         try {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            Optional<User> userByEmailOptional = userService.findByEmail(email);
+            if (userByEmailOptional.isPresent()) {
+                User user = userByEmailOptional.get();
+                if (userId != user.getId() && !user.getRole().equals(Role.ADMIN)) {
+                    throw new AccessDeniedException("Access denied");
+                }
+            } else {
+                throw new ControllerException("User with id = (" + userId + ") doesn't exist", ORDER_ENTITY_CODE);
+            }
             OrderDto orderDto =
                     convertOrderToDto(userService.makeOrderOnGiftCertificate(userId, giftCertificate.getId()));
             return EntityModel.of(orderDto, self);
@@ -139,13 +164,15 @@ public class UserControllerV1 {
 
     @PostMapping()
     @PermitAll
-    public ResponseEntity<String> register(@RequestBody RegistrationRequestDto registrationRequest) {
+    public ResponseEntity<ApiError> register(@RequestBody RegistrationRequestDto registrationRequest) {
         try {
             if (!userService.register(registrationRequest.getEmail(),
                     registrationRequest.getPassword(),
                     registrationRequest.getName(),
                     registrationRequest.getSurname())) {
-                return ResponseEntity.status(HttpStatus.CREATED).body(USER_NOT_CREATED);
+                ApiError result = new ApiError("User with such email is already registered",
+                        "400" + USER_ENTITY_CODE);
+                return ResponseEntity.badRequest().body(result);
             }
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (ServiceException e) {

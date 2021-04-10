@@ -1,5 +1,6 @@
 package com.epam.esm.config;
 
+import com.epam.esm.security.CustomRestAuthenticationEntryPoint;
 import com.epam.esm.security.JwtConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,6 +29,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .exceptionHandling().authenticationEntryPoint(new CustomRestAuthenticationEntryPoint())
                 .and()
                 .apply(jwtConfigurer);
     }

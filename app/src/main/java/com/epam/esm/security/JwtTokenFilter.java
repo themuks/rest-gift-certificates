@@ -15,6 +15,7 @@ import java.io.IOException;
 
 @Component
 public class JwtTokenFilter extends GenericFilterBean {
+    private static final String APPLICATION_JSON = "application/json";
     private final JwtTokenProvider jwtTokenProvider;
 
     public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
@@ -33,8 +34,10 @@ public class JwtTokenFilter extends GenericFilterBean {
             }
         } catch (JwtAuthenticationException e) {
             SecurityContextHolder.clearContext();
-            ((HttpServletResponse) servletResponse).sendError(e.getHttpStatus().value());
-            throw new JwtAuthenticationException("JWT token is expired or invalid");
+            servletResponse.setContentType(APPLICATION_JSON);
+            ((HttpServletResponse) servletResponse).setStatus(e.getHttpStatus().value());
+            servletResponse.getOutputStream().println("{ \"errorMessage\": \"" + e.getLocalizedMessage() + "\", \"errorCode\": \"40103\" }");
+            return;
         }
         filterChain.doFilter(servletRequest, servletResponse);
     }

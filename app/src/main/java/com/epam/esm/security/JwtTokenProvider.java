@@ -19,6 +19,7 @@ import java.util.Date;
 public class JwtTokenProvider {
     private static final String EMPTY_STRING = "";
     private static final String ROLE = "role";
+    private static final int ONE_THOUSAND = 1000;
     private final UserDetailsService userDetailsService;
 
     @Value("${jwt.secret}")
@@ -41,8 +42,7 @@ public class JwtTokenProvider {
         Claims claims = Jwts.claims().setSubject(username);
         claims.put(ROLE, role);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds * 1000);
-
+        Date validity = new Date(now.getTime() + validityInMilliseconds * ONE_THOUSAND);
         return Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
